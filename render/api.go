@@ -77,8 +77,16 @@ func (a *API) CreatePipeline(info render.PipelineInfo) render.Pipeline {
 	return internal.NewPipeline(info)
 }
 
+func (a *API) CreateCommandQueue() render.CommandQueue {
+	return internal.NewCommandQueue()
+}
+
 func (a *API) BeginRenderPass(info render.RenderPassInfo) {
 	a.renderer.BeginRenderPass(info)
+}
+
+func (a *API) EndRenderPass() {
+	a.renderer.EndRenderPass()
 }
 
 func (a *API) BindPipeline(pipeline render.Pipeline) {
@@ -109,6 +117,6 @@ func (a *API) DrawIndexed(indexOffset, indexCount, instanceCount int) {
 	a.renderer.DrawIndexed(indexOffset, indexCount, instanceCount)
 }
 
-func (a *API) EndRenderPass() {
-	a.renderer.EndRenderPass()
+func (a *API) SubmitQueue(queue render.CommandQueue) {
+	a.renderer.SubmitQueue(queue.(*internal.CommandQueue))
 }

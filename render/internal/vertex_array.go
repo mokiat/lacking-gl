@@ -36,7 +36,7 @@ func NewVertexArray(info render.VertexArrayInfo) *VertexArray {
 
 type VertexArray struct {
 	id          uint32
-	indexFormat uint32 // TODO
+	indexFormat uint32
 }
 
 func (a *VertexArray) Release() {
