@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"runtime"
 
 	"github.com/go-gl/gl/v4.6-core/gl"
 	"github.com/mokiat/lacking/render"
@@ -41,13 +40,13 @@ func (r *Renderer) BeginRenderPass(info render.RenderPassInfo) {
 	// TODO
 	// var rgba = [4]float32{
 	// 	0.0,
-	// 	0.3,
-	// 	0.6,
-	// 	1.0,
+	// 	0.0,
+	// 	0.0,
+	// 	0.0,
 	// }
 	// gl.ClearNamedFramebufferfv(r.framebuffer.id, gl.COLOR, 0, &rgba[0])
 
-	clearDepth := info.StencilLoadOp == render.LoadOperationClear
+	clearDepth := info.DepthLoadOp == render.LoadOperationClear
 	clearStencil := info.StencilLoadOp == render.LoadOperationClear
 
 	if clearDepth && clearStencil {
@@ -60,8 +59,8 @@ func (r *Renderer) BeginRenderPass(info render.RenderPassInfo) {
 			gl.ClearNamedFramebufferfv(r.framebuffer.id, gl.DEPTH, 0, &depthValue)
 		}
 		if clearStencil {
-			stencilValue := uint32(info.StencilClearValue)
-			gl.ClearNamedFramebufferuiv(r.framebuffer.id, gl.STENCIL, 0, &stencilValue)
+			stencilValue := int32(info.StencilClearValue)
+			gl.ClearNamedFramebufferiv(r.framebuffer.id, gl.STENCIL, 0, &stencilValue)
 		}
 	}
 
@@ -95,6 +94,7 @@ func (r *Renderer) EndRenderPass() {
 	gl.Disable(gl.CLIP_DISTANCE2)
 	gl.Disable(gl.CLIP_DISTANCE3)
 	gl.Disable(gl.BLEND)
+	gl.ColorMask(true, true, true, true)
 	gl.DepthMask(true)
 
 	r.framebuffer = DefaultFramebuffer
@@ -104,28 +104,26 @@ func (r *Renderer) BindPipeline(pipeline render.Pipeline) {
 	intPipeline := pipeline.(*Pipeline)
 
 	r.executeCommandBindPipeline(CommandBindPipeline{
-		ProgramID:       intPipeline.ProgramID,
-		Topology:        intPipeline.Topology,
-		CullTest:        intPipeline.CullTest,
-		FrontFace:       intPipeline.FrontFace,
-		LineWidth:       intPipeline.LineWidth,
-		DepthTest:       intPipeline.DepthTest,
-		DepthWrite:      intPipeline.DepthWrite,
-		DepthComparison: intPipeline.DepthComparison,
-		VertexArrayID:   intPipeline.VertexArrayID,
-		IndexFormat:     intPipeline.IndexFormat,
+		ProgramID:        intPipeline.ProgramID,
+		Topology:         intPipeline.Topology,
+		CullTest:         intPipeline.CullTest,
+		FrontFace:        intPipeline.FrontFace,
+		LineWidth:        intPipeline.LineWidth,
+		DepthTest:        intPipeline.DepthTest,
+		DepthWrite:       intPipeline.DepthWrite,
+		DepthComparison:  intPipeline.DepthComparison,
+		StencilTest:      intPipeline.StencilTest,
+		StencilOpFront:   intPipeline.StencilOpFront,
+		StencilOpBack:    intPipeline.StencilOpBack,
+		StencilFuncFront: intPipeline.StencilFuncFront,
+		StencilFuncBack:  intPipeline.StencilFuncBack,
+		StencilMaskFront: intPipeline.StencilMaskFront,
+		StencilMaskBack:  intPipeline.StencilMaskBack,
+		ColorWrite:       intPipeline.ColorWrite,
+		BlendEnabled:     intPipeline.BlendEnabled,
+		BlendColor:       intPipeline.BlendColor,
+		VertexArray:      intPipeline.VertexArray,
 	})
-
-	// 	if pipeline.StencilTest {
-	// 		gl.Enable(gl.STENCIL_TEST)
-	// 	} else {
-	// 		gl.Disable(gl.STENCIL_TEST)
-	// 	}
-
-	// 	gl.Enable(gl.BLEND)
-	// 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
-	// 	gl.ColorMask(pipeline.ColorWrite[0], pipeline.ColorWrite[1], pipeline.ColorWrite[2], pipeline.ColorWrite[3])
 }
 
 func (r *Renderer) Uniform4f(location render.UniformLocation, values [4]float32) {
@@ -170,6 +168,23 @@ func (r *Renderer) DrawIndexed(indexOffset, indexCount, instanceCount int) {
 		IndexCount:    int32(indexCount),
 		InstanceCount: int32(instanceCount),
 	})
+}
+
+func (r *Renderer) CopyContentToTexture(info render.CopyContentToTextureInfo) {
+	intTexture := info.Texture.(*Texture)
+	gl.CopyTextureSubImage2D(
+		intTexture.id,
+		int32(info.TextureLevel),
+		int32(info.TextureX),
+		int32(info.TextureY),
+		int32(info.FramebufferX),
+		int32(info.FramebufferY),
+		int32(info.Width),
+		int32(info.Height),
+	)
+	if info.GenerateMipmaps {
+		gl.GenerateTextureMipmap(intTexture.id)
+	}
 }
 
 func (r *Renderer) SubmitQueue(queue *CommandQueue) {
@@ -226,6 +241,7 @@ func (r *Renderer) SubmitQueue(queue *CommandQueue) {
 }
 
 func (r *Renderer) executeCommandBindPipeline(command CommandBindPipeline) {
+	gl.UseProgram(command.ProgramID)
 	r.executeCommandTopology(command.Topology)
 	r.executeCommandCullTest(command.CullTest)
 	r.executeCommandFrontFace(command.FrontFace)
@@ -233,21 +249,26 @@ func (r *Renderer) executeCommandBindPipeline(command CommandBindPipeline) {
 	r.executeCommandDepthTest(command.DepthTest)
 	r.executeCommandDepthWrite(command.DepthWrite)
 	r.executeCommandDepthComparison(command.DepthComparison)
-
-	// if pipeline.StencilTest {
-	// 	gl.Enable(gl.STENCIL_TEST)
-	// } else {
-	// 	gl.Disable(gl.STENCIL_TEST)
-	// }
-
-	gl.Enable(gl.BLEND)
+	r.executeCommandStencilTest(command.StencilTest)
+	// TODO: Optimize if equal (except for face)
+	r.executeCommandStencilFunc(command.StencilFuncFront)
+	r.executeCommandStencilFunc(command.StencilFuncBack)
+	// TODO: Optimize if equal (except for face)
+	r.executeCommandStencilOperation(command.StencilOpFront)
+	r.executeCommandStencilOperation(command.StencilOpBack)
+	// TODO: Optimize if equal (except for face)
+	r.executeCommandStencilMask(command.StencilMaskFront)
+	r.executeCommandStencilMask(command.StencilMaskBack)
+	r.executeCommandColorWrite(command.ColorWrite)
+	if command.BlendEnabled {
+		gl.Enable(gl.BLEND)
+	} else {
+		gl.Disable(gl.BLEND)
+	}
+	// TODO
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
-	// gl.ColorMask(pipeline.ColorWrite[0], pipeline.ColorWrite[1], pipeline.ColorWrite[2], pipeline.ColorWrite[3])
-
-	gl.UseProgram(command.ProgramID)
-	gl.BindVertexArray(command.VertexArrayID)
-	r.indexType = command.IndexFormat
+	r.executeCommandBlendColor(command.BlendColor)
+	r.executeCommandBindVertexArray(command.VertexArray)
 }
 
 func (r *Renderer) executeCommandTopology(command CommandTopology) {
@@ -268,7 +289,9 @@ func (r *Renderer) executeCommandFrontFace(command CommandFrontFace) {
 }
 
 func (r *Renderer) executeCommandLineWidth(command CommandLineWidth) {
-	gl.LineWidth(command.Width)
+	if command.Width > 0.0 {
+		gl.LineWidth(command.Width)
+	}
 }
 
 func (r *Renderer) executeCommandDepthTest(command CommandDepthTest) {
@@ -285,6 +308,57 @@ func (r *Renderer) executeCommandDepthWrite(command CommandDepthWrite) {
 
 func (r *Renderer) executeCommandDepthComparison(command CommandDepthComparison) {
 	gl.DepthFunc(command.Mode)
+}
+
+func (r *Renderer) executeCommandStencilTest(command CommandStencilTest) {
+	if command.Enabled {
+		gl.Enable(gl.STENCIL_TEST)
+	} else {
+		gl.Disable(gl.STENCIL_TEST)
+	}
+}
+
+func (r *Renderer) executeCommandStencilOperation(command CommandStencilOperation) {
+	gl.StencilOpSeparate(
+		command.Face,
+		command.StencilFail,
+		command.DepthFail,
+		command.Pass,
+	)
+}
+
+func (r *Renderer) executeCommandStencilFunc(command CommandStencilFunc) {
+	gl.StencilFuncSeparate(
+		command.Face,
+		command.Func,
+		int32(command.Ref),
+		command.Mask,
+	)
+}
+
+func (r *Renderer) executeCommandStencilMask(command CommandStencilMask) {
+	gl.StencilMaskSeparate(
+		command.Face,
+		command.Mask,
+	)
+}
+
+func (r *Renderer) executeCommandColorWrite(command CommandColorWrite) {
+	gl.ColorMask(command.Mask[0], command.Mask[1], command.Mask[2], command.Mask[3])
+}
+
+func (r *Renderer) executeCommandBlendColor(command CommandBlendColor) {
+	gl.BlendColor(
+		command.Color[0],
+		command.Color[1],
+		command.Color[2],
+		command.Color[3],
+	)
+}
+
+func (r *Renderer) executeCommandBindVertexArray(command CommandBindVertexArray) {
+	gl.BindVertexArray(command.VertexArrayID)
+	r.indexType = command.IndexFormat
 }
 
 func (r *Renderer) executeCommandUniform4f(command CommandUniform4f) {
@@ -312,7 +386,6 @@ func (r *Renderer) executeCommandUniformMatrix4f(command CommandUniformMatrix4f)
 		false,
 		&slice[0],
 	)
-	runtime.KeepAlive(slice)
 }
 
 func (r *Renderer) executeCommandTextureUnit(command CommandTextureUnit) {

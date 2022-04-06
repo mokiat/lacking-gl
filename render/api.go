@@ -117,6 +117,10 @@ func (a *API) DrawIndexed(indexOffset, indexCount, instanceCount int) {
 	a.renderer.DrawIndexed(indexOffset, indexCount, instanceCount)
 }
 
+func (a *API) CopyContentToTexture(info render.CopyContentToTextureInfo) {
+	a.renderer.CopyContentToTexture(info)
+}
+
 func (a *API) SubmitQueue(queue render.CommandQueue) {
 	a.renderer.SubmitQueue(queue.(*internal.CommandQueue))
 }

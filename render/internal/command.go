@@ -29,16 +29,25 @@ func (q *CommandQueue) BindPipeline(pipeline render.Pipeline) {
 	})
 	intPipeline := pipeline.(*Pipeline)
 	PushCommand(q, CommandBindPipeline{
-		ProgramID:       intPipeline.ProgramID,
-		Topology:        intPipeline.Topology,
-		CullTest:        intPipeline.CullTest,
-		FrontFace:       intPipeline.FrontFace,
-		LineWidth:       intPipeline.LineWidth,
-		DepthTest:       intPipeline.DepthTest,
-		DepthWrite:      intPipeline.DepthWrite,
-		DepthComparison: intPipeline.DepthComparison,
-		VertexArrayID:   intPipeline.VertexArrayID,
-		IndexFormat:     intPipeline.IndexFormat,
+		ProgramID:        intPipeline.ProgramID,
+		Topology:         intPipeline.Topology,
+		CullTest:         intPipeline.CullTest,
+		FrontFace:        intPipeline.FrontFace,
+		LineWidth:        intPipeline.LineWidth,
+		DepthTest:        intPipeline.DepthTest,
+		DepthWrite:       intPipeline.DepthWrite,
+		DepthComparison:  intPipeline.DepthComparison,
+		StencilTest:      intPipeline.StencilTest,
+		StencilOpFront:   intPipeline.StencilOpFront,
+		StencilOpBack:    intPipeline.StencilOpBack,
+		StencilFuncFront: intPipeline.StencilFuncFront,
+		StencilFuncBack:  intPipeline.StencilFuncBack,
+		StencilMaskFront: intPipeline.StencilMaskFront,
+		StencilMaskBack:  intPipeline.StencilMaskBack,
+		ColorWrite:       intPipeline.ColorWrite,
+		BlendEnabled:     intPipeline.BlendEnabled,
+		BlendColor:       intPipeline.BlendColor,
+		VertexArray:      intPipeline.VertexArray,
 	})
 }
 
@@ -97,14 +106,15 @@ func (q *CommandQueue) DrawIndexed(indexOffset, indexCount, instanceCount int) {
 	PushCommand(q, CommandHeader{
 		Kind: CommandKindDrawIndexed,
 	})
-	PushCommand(q, CommandDraw{
-		VertexOffset:  int32(indexOffset),
-		VertexCount:   int32(indexCount),
+	PushCommand(q, CommandDrawIndexed{
+		IndexOffset:   int32(indexOffset),
+		IndexCount:    int32(indexCount),
 		InstanceCount: int32(instanceCount),
 	})
 }
 
 func (q *CommandQueue) Release() {
+	q.data = nil
 }
 
 func MoreCommands(queue *CommandQueue) bool {
@@ -135,6 +145,13 @@ const (
 	CommandKindDepthTest
 	CommandKindDepthWrite
 	CommandKindDepthComparison
+	CommandKindStencilTest
+	CommandKindStencilOperation
+	CommandKindStencilFunc
+	CommandKindStencilMask
+	CommandKindColorWrite
+	CommandKindBlendColor
+	CommandBindKindVertexArray
 	CommandKindUniform4f
 	CommandKindUniform1i
 	CommandKindUniformMatrix4f
@@ -148,29 +165,31 @@ type CommandHeader struct {
 }
 
 type CommandBindPipeline struct {
-	ProgramID       uint32
-	Topology        CommandTopology
-	CullTest        CommandCullTest
-	FrontFace       CommandFrontFace
-	LineWidth       CommandLineWidth
-	DepthTest       CommandDepthTest
-	DepthWrite      CommandDepthWrite
-	DepthComparison CommandDepthComparison
-	VertexArrayID   uint32
-	IndexFormat     uint32
-
-	// StencilTest                 bool
-	// StencilFront                StencilOperationState
-	// StencilBack                 StencilOperationState
-	// ColorWrite                  [4]bool
-	// BlendEnabled                bool
-	// BlendColor                  sprec.Vec4
+	ProgramID        uint32 // not dynamic
+	Topology         CommandTopology
+	CullTest         CommandCullTest
+	FrontFace        CommandFrontFace
+	LineWidth        CommandLineWidth
+	DepthTest        CommandDepthTest
+	DepthWrite       CommandDepthWrite
+	DepthComparison  CommandDepthComparison
+	StencilTest      CommandStencilTest
+	StencilOpFront   CommandStencilOperation
+	StencilOpBack    CommandStencilOperation
+	StencilFuncFront CommandStencilFunc
+	StencilFuncBack  CommandStencilFunc
+	StencilMaskFront CommandStencilMask
+	StencilMaskBack  CommandStencilMask
+	ColorWrite       CommandColorWrite
+	BlendEnabled     bool // not dynamic
 	// BlendSourceColorFactor      BlendFactor
 	// BlendDestinationColorFactor BlendFactor
 	// BlendSourceAlphaFactor      BlendFactor
 	// BlendDestinationAlphaFactor BlendFactor
 	// BlendOpColor                BlendOperation
 	// BlendOpAlpha                BlendOperation
+	BlendColor  CommandBlendColor
+	VertexArray CommandBindVertexArray
 }
 
 type CommandTopology struct {
@@ -200,6 +219,42 @@ type CommandDepthWrite struct {
 
 type CommandDepthComparison struct {
 	Mode uint32
+}
+
+type CommandStencilTest struct {
+	Enabled bool
+}
+
+type CommandStencilOperation struct {
+	Face        uint32
+	StencilFail uint32
+	DepthFail   uint32
+	Pass        uint32
+}
+
+type CommandStencilFunc struct {
+	Face uint32
+	Func uint32
+	Ref  uint32
+	Mask uint32
+}
+
+type CommandStencilMask struct {
+	Face uint32
+	Mask uint32
+}
+
+type CommandColorWrite struct {
+	Mask [4]bool
+}
+
+type CommandBlendColor struct {
+	Color [4]float32
+}
+
+type CommandBindVertexArray struct {
+	VertexArrayID uint32
+	IndexFormat   uint32
 }
 
 type CommandUniform4f struct {

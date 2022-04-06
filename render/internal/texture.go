@@ -8,7 +8,6 @@ import (
 func NewColorTexture2D(info render.ColorTexture2DInfo) *Texture {
 	var id uint32
 	gl.CreateTextures(gl.TEXTURE_2D, 1, &id)
-
 	gl.TextureParameteri(id, gl.TEXTURE_WRAP_S, glWrap(info.Wrapping))
 	gl.TextureParameteri(id, gl.TEXTURE_WRAP_T, glWrap(info.Wrapping))
 	gl.TextureParameteri(id, gl.TEXTURE_MIN_FILTER, glFilter(info.Filtering, info.Mipmapping))
@@ -41,14 +40,11 @@ func NewColorTexture2D(info render.ColorTexture2DInfo) *Texture {
 func NewDepthTexture2D(info render.DepthTexture2DInfo) *Texture {
 	var id uint32
 	gl.CreateTextures(gl.TEXTURE_2D, 1, &id)
-
 	gl.TextureParameteri(id, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 	gl.TextureParameteri(id, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 	gl.TextureParameteri(id, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TextureParameteri(id, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-
 	gl.TextureStorage2D(id, 1, gl.DEPTH_COMPONENT32, int32(info.Width), int32(info.Height))
-
 	return &Texture{
 		id: id,
 	}
@@ -57,14 +53,11 @@ func NewDepthTexture2D(info render.DepthTexture2DInfo) *Texture {
 func NewStencilTexture2D(info render.StencilTexture2DInfo) *Texture {
 	var id uint32
 	gl.CreateTextures(gl.TEXTURE_2D, 1, &id)
-
 	gl.TextureParameteri(id, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 	gl.TextureParameteri(id, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 	gl.TextureParameteri(id, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TextureParameteri(id, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-
 	gl.TextureStorage2D(id, 1, gl.STENCIL_INDEX8, int32(info.Width), int32(info.Height))
-
 	return &Texture{
 		id: id,
 	}
@@ -73,14 +66,11 @@ func NewStencilTexture2D(info render.StencilTexture2DInfo) *Texture {
 func NewDepthStencilTexture2D(info render.DepthStencilTexture2DInfo) *Texture {
 	var id uint32
 	gl.CreateTextures(gl.TEXTURE_2D, 1, &id)
-
 	gl.TextureParameteri(id, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 	gl.TextureParameteri(id, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 	gl.TextureParameteri(id, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TextureParameteri(id, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-
 	gl.TextureStorage2D(id, 1, gl.DEPTH24_STENCIL8, int32(info.Width), int32(info.Height))
-
 	return &Texture{
 		id: id,
 	}
