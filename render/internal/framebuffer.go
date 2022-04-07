@@ -10,12 +10,14 @@ func NewFramebuffer(info render.FramebufferInfo) *Framebuffer {
 	var id uint32
 	gl.CreateFramebuffers(1, &id)
 
+	var activeDrawBuffers [4]bool
 	var drawBuffers []uint32
 	for i, attachment := range info.ColorAttachments {
 		if colorAttachment, ok := attachment.(*Texture); ok {
 			attachmentID := gl.COLOR_ATTACHMENT0 + uint32(i)
 			gl.NamedFramebufferTexture(id, attachmentID, colorAttachment.id, 0)
 			drawBuffers = append(drawBuffers, attachmentID)
+			activeDrawBuffers[i] = true
 		}
 	}
 
@@ -38,19 +40,23 @@ func NewFramebuffer(info render.FramebufferInfo) *Framebuffer {
 	}
 
 	return &Framebuffer{
-		id: id,
+		id:                id,
+		activeDrawBuffers: activeDrawBuffers,
 	}
 }
 
 var DefaultFramebuffer = &Framebuffer{
-	id: 0,
+	id:                0,
+	activeDrawBuffers: [4]bool{true, false, false, false},
 }
 
 type Framebuffer struct {
-	id uint32
+	id                uint32
+	activeDrawBuffers [4]bool
 }
 
 func (f *Framebuffer) Release() {
 	gl.DeleteFramebuffers(1, &f.id)
 	f.id = 0
+	f.activeDrawBuffers = [4]bool{}
 }

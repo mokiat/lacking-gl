@@ -28,6 +28,7 @@ func (r *Renderer) BeginRenderPass(info render.RenderPassInfo) {
 	gl.Enable(gl.CLIP_DISTANCE3)
 
 	r.framebuffer = info.Framebuffer.(*Framebuffer)
+	isDefaultFramebuffer := r.framebuffer.id == 0
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, r.framebuffer.id)
 	gl.Viewport(
@@ -37,14 +38,11 @@ func (r *Renderer) BeginRenderPass(info render.RenderPassInfo) {
 		int32(info.Viewport.Height),
 	)
 
-	// TODO
-	// var rgba = [4]float32{
-	// 	0.0,
-	// 	0.0,
-	// 	0.0,
-	// 	0.0,
-	// }
-	// gl.ClearNamedFramebufferfv(r.framebuffer.id, gl.COLOR, 0, &rgba[0])
+	for i, attachment := range info.Colors {
+		if r.framebuffer.activeDrawBuffers[i] && (attachment.LoadOp == render.LoadOperationClear) {
+			gl.ClearNamedFramebufferfv(r.framebuffer.id, gl.COLOR, int32(i), &attachment.ClearValue[0])
+		}
+	}
 
 	clearDepth := info.DepthLoadOp == render.LoadOperationClear
 	clearStencil := info.StencilLoadOp == render.LoadOperationClear
@@ -64,19 +62,39 @@ func (r *Renderer) BeginRenderPass(info render.RenderPassInfo) {
 		}
 	}
 
+	r.invalidateAttachments = r.invalidateAttachments[:0]
+
 	invalidateDepth := info.DepthStoreOp == render.StoreOperationDontCare
 	invalidateStencil := info.StencilStoreOp == render.StoreOperationDontCare
 
-	r.invalidateAttachments = r.invalidateAttachments[:0]
+	for i, attachment := range info.Colors {
+		if r.framebuffer.activeDrawBuffers[i] && (attachment.StoreOp == render.StoreOperationDontCare) {
+			if isDefaultFramebuffer {
+				if i == 0 {
+					r.invalidateAttachments = append(r.invalidateAttachments, gl.COLOR)
+				}
+			} else {
+				r.invalidateAttachments = append(r.invalidateAttachments, gl.COLOR_ATTACHMENT0+uint32(i))
+			}
+		}
+	}
 
-	if invalidateDepth && invalidateStencil {
+	if invalidateDepth && invalidateStencil && !isDefaultFramebuffer {
 		r.invalidateAttachments = append(r.invalidateAttachments, gl.DEPTH_STENCIL_ATTACHMENT)
 	} else {
 		if invalidateDepth {
-			r.invalidateAttachments = append(r.invalidateAttachments, gl.DEPTH_ATTACHMENT)
+			if isDefaultFramebuffer {
+				r.invalidateAttachments = append(r.invalidateAttachments, gl.DEPTH)
+			} else {
+				r.invalidateAttachments = append(r.invalidateAttachments, gl.DEPTH_ATTACHMENT)
+			}
 		}
 		if invalidateStencil {
-			r.invalidateAttachments = append(r.invalidateAttachments, gl.STENCIL_ATTACHMENT)
+			if isDefaultFramebuffer {
+				r.invalidateAttachments = append(r.invalidateAttachments, gl.STENCIL)
+			} else {
+				r.invalidateAttachments = append(r.invalidateAttachments, gl.STENCIL_ATTACHMENT)
+			}
 		}
 	}
 }

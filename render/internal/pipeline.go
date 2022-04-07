@@ -94,12 +94,7 @@ func NewPipeline(info render.PipelineInfo) *Pipeline {
 	pipeline.ColorWrite.Mask = info.ColorWrite
 
 	pipeline.BlendEnabled = info.BlendEnabled
-	pipeline.BlendColor.Color = [4]float32{ // TODO: Add ToArray method on sprec
-		info.BlendColor.X,
-		info.BlendColor.Y,
-		info.BlendColor.Z,
-		info.BlendColor.W,
-	}
+	pipeline.BlendColor.Color = info.BlendColor
 
 	return pipeline
 }
