@@ -34,7 +34,7 @@ func (a *API) CreateColorTexture2D(info render.ColorTexture2DInfo) render.Textur
 }
 
 func (a *API) CreateColorTextureCube(info render.ColorTextureCubeInfo) render.Texture {
-	panic("TODO")
+	return internal.NewColorTextureCube(info)
 }
 
 func (a *API) CreateDepthTexture2D(info render.DepthTexture2DInfo) render.Texture {

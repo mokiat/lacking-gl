@@ -76,6 +76,55 @@ func NewDepthStencilTexture2D(info render.DepthStencilTexture2DInfo) *Texture {
 	}
 }
 
+func NewColorTextureCube(info render.ColorTextureCubeInfo) *Texture {
+	var id uint32
+	gl.CreateTextures(gl.TEXTURE_CUBE_MAP, 1, &id)
+	gl.TextureParameteri(id, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+	gl.TextureParameteri(id, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+	gl.TextureParameteri(id, gl.TEXTURE_MIN_FILTER, glFilter(info.Filtering, info.Mipmapping))
+	gl.TextureParameteri(id, gl.TEXTURE_MAG_FILTER, glFilter(info.Filtering, false)) // no mipmaps when magnification
+	if info.Filtering == render.FilterModeAnisotropic {
+		var maxAnisotropy float32
+		gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &maxAnisotropy)
+		gl.TextureParameterf(id, gl.TEXTURE_MAX_ANISOTROPY, maxAnisotropy)
+	}
+
+	levels := glMipmapLevels(info.Dimension, info.Dimension, info.Mipmapping)
+	internalFormat := glInternalFormat(info.Format, info.GammaCorrection)
+
+	gl.TextureStorage2D(id, levels, internalFormat, int32(info.Dimension), int32(info.Dimension))
+
+	dataFormat := glDataFormat(info.Format)
+	componentType := glDataComponentType(info.Format)
+	if info.RightSideData != nil {
+		gl.TextureSubImage3D(id, 0, 0, 0, 0, int32(info.Dimension), int32(info.Dimension), 1, dataFormat, componentType, gl.Ptr(info.RightSideData))
+	}
+	if info.LeftSideData != nil {
+		gl.TextureSubImage3D(id, 0, 0, 0, 1, int32(info.Dimension), int32(info.Dimension), 1, dataFormat, componentType, gl.Ptr(info.RightSideData))
+	}
+	if info.BottomSideData != nil {
+		gl.TextureSubImage3D(id, 0, 0, 0, 2, int32(info.Dimension), int32(info.Dimension), 1, dataFormat, componentType, gl.Ptr(info.RightSideData))
+	}
+	if info.TopSideData != nil {
+		gl.TextureSubImage3D(id, 0, 0, 0, 3, int32(info.Dimension), int32(info.Dimension), 1, dataFormat, componentType, gl.Ptr(info.RightSideData))
+	}
+	if info.FrontSideData != nil {
+		gl.TextureSubImage3D(id, 0, 0, 0, 4, int32(info.Dimension), int32(info.Dimension), 1, dataFormat, componentType, gl.Ptr(info.RightSideData))
+	}
+	if info.BackSideData != nil {
+		gl.TextureSubImage3D(id, 0, 0, 0, 5, int32(info.Dimension), int32(info.Dimension), 1, dataFormat, componentType, gl.Ptr(info.RightSideData))
+	}
+
+	// TODO: Move as separate command
+	// if info.Mipmapping {
+	// 	gl.GenerateTextureMipmap(id)
+	// }
+
+	return &Texture{
+		id: id,
+	}
+}
+
 type Texture struct {
 	id uint32
 }
