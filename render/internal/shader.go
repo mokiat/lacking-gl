@@ -33,6 +33,7 @@ func NewFragmentShader(info render.ShaderInfo) *Shader {
 }
 
 type Shader struct {
+	render.ShaderObject
 	id uint32
 }
 

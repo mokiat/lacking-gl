@@ -100,19 +100,19 @@ func NewColorTextureCube(info render.ColorTextureCubeInfo) *Texture {
 		gl.TextureSubImage3D(id, 0, 0, 0, 0, int32(info.Dimension), int32(info.Dimension), 1, dataFormat, componentType, gl.Ptr(info.RightSideData))
 	}
 	if info.LeftSideData != nil {
-		gl.TextureSubImage3D(id, 0, 0, 0, 1, int32(info.Dimension), int32(info.Dimension), 1, dataFormat, componentType, gl.Ptr(info.RightSideData))
+		gl.TextureSubImage3D(id, 0, 0, 0, 1, int32(info.Dimension), int32(info.Dimension), 1, dataFormat, componentType, gl.Ptr(info.LeftSideData))
 	}
 	if info.BottomSideData != nil {
-		gl.TextureSubImage3D(id, 0, 0, 0, 2, int32(info.Dimension), int32(info.Dimension), 1, dataFormat, componentType, gl.Ptr(info.RightSideData))
+		gl.TextureSubImage3D(id, 0, 0, 0, 2, int32(info.Dimension), int32(info.Dimension), 1, dataFormat, componentType, gl.Ptr(info.BottomSideData))
 	}
 	if info.TopSideData != nil {
-		gl.TextureSubImage3D(id, 0, 0, 0, 3, int32(info.Dimension), int32(info.Dimension), 1, dataFormat, componentType, gl.Ptr(info.RightSideData))
+		gl.TextureSubImage3D(id, 0, 0, 0, 3, int32(info.Dimension), int32(info.Dimension), 1, dataFormat, componentType, gl.Ptr(info.TopSideData))
 	}
 	if info.FrontSideData != nil {
-		gl.TextureSubImage3D(id, 0, 0, 0, 4, int32(info.Dimension), int32(info.Dimension), 1, dataFormat, componentType, gl.Ptr(info.RightSideData))
+		gl.TextureSubImage3D(id, 0, 0, 0, 4, int32(info.Dimension), int32(info.Dimension), 1, dataFormat, componentType, gl.Ptr(info.FrontSideData))
 	}
 	if info.BackSideData != nil {
-		gl.TextureSubImage3D(id, 0, 0, 0, 5, int32(info.Dimension), int32(info.Dimension), 1, dataFormat, componentType, gl.Ptr(info.RightSideData))
+		gl.TextureSubImage3D(id, 0, 0, 0, 5, int32(info.Dimension), int32(info.Dimension), 1, dataFormat, componentType, gl.Ptr(info.BackSideData))
 	}
 
 	// TODO: Move as separate command
@@ -126,6 +126,7 @@ func NewColorTextureCube(info render.ColorTextureCubeInfo) *Texture {
 }
 
 type Texture struct {
+	render.TextureObject
 	id uint32
 }
 

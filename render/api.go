@@ -69,6 +69,10 @@ func (a *API) CreateIndexBuffer(info render.BufferInfo) render.Buffer {
 	return internal.NewIndexBuffer(info)
 }
 
+func (a *API) CreatePixelTransferBuffer(info render.BufferInfo) render.Buffer {
+	return internal.NewPixelTransferBuffer(info)
+}
+
 func (a *API) CreateVertexArray(info render.VertexArrayInfo) render.VertexArray {
 	return internal.NewVertexArray(info)
 }
@@ -93,12 +97,20 @@ func (a *API) BindPipeline(pipeline render.Pipeline) {
 	a.renderer.BindPipeline(pipeline)
 }
 
-func (a *API) Uniform4f(location render.UniformLocation, values [4]float32) {
-	a.renderer.Uniform4f(location, values)
+func (a *API) Uniform1f(location render.UniformLocation, value float32) {
+	a.renderer.Uniform1f(location, value)
 }
 
 func (a *API) Uniform1i(location render.UniformLocation, value int) {
 	a.renderer.Uniform1i(location, value)
+}
+
+func (a *API) Uniform3f(location render.UniformLocation, values [3]float32) {
+	a.renderer.Uniform3f(location, values)
+}
+
+func (a *API) Uniform4f(location render.UniformLocation, values [4]float32) {
+	a.renderer.Uniform4f(location, values)
 }
 
 func (a *API) UniformMatrix4f(location render.UniformLocation, values [16]float32) {

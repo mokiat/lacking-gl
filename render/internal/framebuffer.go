@@ -51,6 +51,7 @@ var DefaultFramebuffer = &Framebuffer{
 }
 
 type Framebuffer struct {
+	render.FramebufferObject
 	id                uint32
 	activeDrawBuffers [4]bool
 }

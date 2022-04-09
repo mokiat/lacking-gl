@@ -13,6 +13,10 @@ func NewIndexBuffer(info render.BufferInfo) *Buffer {
 	return newBuffer(info)
 }
 
+func NewPixelTransferBuffer(info render.BufferInfo) render.Buffer {
+	return newBuffer(info)
+}
+
 func newBuffer(info render.BufferInfo) *Buffer {
 	var id uint32
 	gl.CreateBuffers(1, &id)
@@ -29,6 +33,7 @@ func newBuffer(info render.BufferInfo) *Buffer {
 }
 
 type Buffer struct {
+	render.BufferObject
 	id uint32
 }
 

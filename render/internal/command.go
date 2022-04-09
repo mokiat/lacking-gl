@@ -47,17 +47,19 @@ func (q *CommandQueue) BindPipeline(pipeline render.Pipeline) {
 		ColorWrite:       intPipeline.ColorWrite,
 		BlendEnabled:     intPipeline.BlendEnabled,
 		BlendColor:       intPipeline.BlendColor,
+		BlendEquation:    intPipeline.BlendEquation,
+		BlendFunc:        intPipeline.BlendFunc,
 		VertexArray:      intPipeline.VertexArray,
 	})
 }
 
-func (q *CommandQueue) Uniform4f(location render.UniformLocation, values [4]float32) {
+func (q *CommandQueue) Uniform1f(location render.UniformLocation, value float32) {
 	PushCommand(q, CommandHeader{
-		Kind: CommandKindUniform4f,
+		Kind: CommandKindUniform1f,
 	})
-	PushCommand(q, CommandUniform4f{
+	PushCommand(q, CommandUniform1f{
 		Location: location.(int32),
-		Values:   values,
+		Value:    value,
 	})
 }
 
@@ -68,6 +70,26 @@ func (q *CommandQueue) Uniform1i(location render.UniformLocation, value int) {
 	PushCommand(q, CommandUniform1i{
 		Location: location.(int32),
 		Value:    int32(value),
+	})
+}
+
+func (q *CommandQueue) Uniform3f(location render.UniformLocation, values [3]float32) {
+	PushCommand(q, CommandHeader{
+		Kind: CommandKindUniform3f,
+	})
+	PushCommand(q, CommandUniform3f{
+		Location: location.(int32),
+		Values:   values,
+	})
+}
+
+func (q *CommandQueue) Uniform4f(location render.UniformLocation, values [4]float32) {
+	PushCommand(q, CommandHeader{
+		Kind: CommandKindUniform4f,
+	})
+	PushCommand(q, CommandUniform4f{
+		Location: location.(int32),
+		Values:   values,
 	})
 }
 
@@ -151,9 +173,13 @@ const (
 	CommandKindStencilMask
 	CommandKindColorWrite
 	CommandKindBlendColor
+	CommandKindBlendEquation
+	CommandKindBlendFunc
 	CommandBindKindVertexArray
-	CommandKindUniform4f
+	CommandKindUniform1f
 	CommandKindUniform1i
+	CommandKindUniform3f
+	CommandKindUniform4f
 	CommandKindUniformMatrix4f
 	CommandKindTextureUnit
 	CommandKindDraw
@@ -182,14 +208,10 @@ type CommandBindPipeline struct {
 	StencilMaskBack  CommandStencilMask
 	ColorWrite       CommandColorWrite
 	BlendEnabled     bool // not dynamic
-	// BlendSourceColorFactor      BlendFactor
-	// BlendDestinationColorFactor BlendFactor
-	// BlendSourceAlphaFactor      BlendFactor
-	// BlendDestinationAlphaFactor BlendFactor
-	// BlendOpColor                BlendOperation
-	// BlendOpAlpha                BlendOperation
-	BlendColor  CommandBlendColor
-	VertexArray CommandBindVertexArray
+	BlendEquation    CommandBlendEquation
+	BlendFunc        CommandBlendFunc
+	BlendColor       CommandBlendColor
+	VertexArray      CommandBindVertexArray
 }
 
 type CommandTopology struct {
@@ -252,19 +274,41 @@ type CommandBlendColor struct {
 	Color [4]float32
 }
 
+type CommandBlendEquation struct {
+	ModeRGB   uint32
+	ModeAlpha uint32
+}
+
+type CommandBlendFunc struct {
+	SourceFactorRGB        uint32
+	DestinationFactorRGB   uint32
+	SourceFactorAlpha      uint32
+	DestinationFactorAlpha uint32
+}
+
 type CommandBindVertexArray struct {
 	VertexArrayID uint32
 	IndexFormat   uint32
 }
 
-type CommandUniform4f struct {
+type CommandUniform1f struct {
 	Location int32
-	Values   [4]float32
+	Value    float32
 }
 
 type CommandUniform1i struct {
 	Location int32
 	Value    int32
+}
+
+type CommandUniform3f struct {
+	Location int32
+	Values   [3]float32
+}
+
+type CommandUniform4f struct {
+	Location int32
+	Values   [4]float32
 }
 
 type CommandUniformMatrix4f struct {

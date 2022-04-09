@@ -140,14 +140,16 @@ func (r *Renderer) BindPipeline(pipeline render.Pipeline) {
 		ColorWrite:       intPipeline.ColorWrite,
 		BlendEnabled:     intPipeline.BlendEnabled,
 		BlendColor:       intPipeline.BlendColor,
+		BlendEquation:    intPipeline.BlendEquation,
+		BlendFunc:        intPipeline.BlendFunc,
 		VertexArray:      intPipeline.VertexArray,
 	})
 }
 
-func (r *Renderer) Uniform4f(location render.UniformLocation, values [4]float32) {
-	r.executeCommandUniform4f(CommandUniform4f{
+func (r *Renderer) Uniform1f(location render.UniformLocation, value float32) {
+	r.executeCommandUniform1f(CommandUniform1f{
 		Location: location.(int32),
-		Values:   values,
+		Value:    value,
 	})
 }
 
@@ -155,6 +157,20 @@ func (r *Renderer) Uniform1i(location render.UniformLocation, value int) {
 	r.executeCommandUniform1i(CommandUniform1i{
 		Location: location.(int32),
 		Value:    int32(value),
+	})
+}
+
+func (r *Renderer) Uniform3f(location render.UniformLocation, values [3]float32) {
+	r.executeCommandUniform3f(CommandUniform3f{
+		Location: location.(int32),
+		Values:   values,
+	})
+}
+
+func (r *Renderer) Uniform4f(location render.UniformLocation, values [4]float32) {
+	r.executeCommandUniform4f(CommandUniform4f{
+		Location: location.(int32),
+		Values:   values,
 	})
 }
 
@@ -233,12 +249,18 @@ func (r *Renderer) SubmitQueue(queue *CommandQueue) {
 		case CommandKindDepthComparison:
 			command := PopCommand[CommandDepthComparison](queue)
 			r.executeCommandDepthComparison(command)
-		case CommandKindUniform4f:
-			command := PopCommand[CommandUniform4f](queue)
-			r.executeCommandUniform4f(command)
+		case CommandKindUniform1f:
+			command := PopCommand[CommandUniform1f](queue)
+			r.executeCommandUniform1f(command)
 		case CommandKindUniform1i:
 			command := PopCommand[CommandUniform1i](queue)
 			r.executeCommandUniform1i(command)
+		case CommandKindUniform3f:
+			command := PopCommand[CommandUniform3f](queue)
+			r.executeCommandUniform3f(command)
+		case CommandKindUniform4f:
+			command := PopCommand[CommandUniform4f](queue)
+			r.executeCommandUniform4f(command)
 		case CommandKindUniformMatrix4f:
 			command := PopCommand[CommandUniformMatrix4f](queue)
 			r.executeCommandUniformMatrix4f(command)
@@ -268,13 +290,13 @@ func (r *Renderer) executeCommandBindPipeline(command CommandBindPipeline) {
 	r.executeCommandDepthWrite(command.DepthWrite)
 	r.executeCommandDepthComparison(command.DepthComparison)
 	r.executeCommandStencilTest(command.StencilTest)
-	// TODO: Optimize if equal (except for face)
+	// TODO: Optimize if equal except for face
 	r.executeCommandStencilFunc(command.StencilFuncFront)
 	r.executeCommandStencilFunc(command.StencilFuncBack)
-	// TODO: Optimize if equal (except for face)
+	// TODO: Optimize if equal except for face
 	r.executeCommandStencilOperation(command.StencilOpFront)
 	r.executeCommandStencilOperation(command.StencilOpBack)
-	// TODO: Optimize if equal (except for face)
+	// TODO: Optimize if equal except for face
 	r.executeCommandStencilMask(command.StencilMaskFront)
 	r.executeCommandStencilMask(command.StencilMaskBack)
 	r.executeCommandColorWrite(command.ColorWrite)
@@ -283,8 +305,8 @@ func (r *Renderer) executeCommandBindPipeline(command CommandBindPipeline) {
 	} else {
 		gl.Disable(gl.BLEND)
 	}
-	// TODO
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	r.executeCommandBlendEquation(command.BlendEquation)
+	r.executeCommandBlendFunc(command.BlendFunc)
 	r.executeCommandBlendColor(command.BlendColor)
 	r.executeCommandBindVertexArray(command.VertexArray)
 }
@@ -374,9 +396,48 @@ func (r *Renderer) executeCommandBlendColor(command CommandBlendColor) {
 	)
 }
 
+func (r *Renderer) executeCommandBlendEquation(command CommandBlendEquation) {
+	gl.BlendEquationSeparate(
+		command.ModeRGB,
+		command.ModeAlpha,
+	)
+}
+
+func (r *Renderer) executeCommandBlendFunc(command CommandBlendFunc) {
+	gl.BlendFuncSeparate(
+		command.SourceFactorRGB,
+		command.DestinationFactorRGB,
+		command.SourceFactorAlpha,
+		command.DestinationFactorAlpha,
+	)
+}
+
 func (r *Renderer) executeCommandBindVertexArray(command CommandBindVertexArray) {
 	gl.BindVertexArray(command.VertexArrayID)
 	r.indexType = command.IndexFormat
+}
+
+func (r *Renderer) executeCommandUniform1f(command CommandUniform1f) {
+	gl.Uniform1f(
+		command.Location,
+		command.Value,
+	)
+}
+
+func (r *Renderer) executeCommandUniform1i(command CommandUniform1i) {
+	gl.Uniform1i(
+		command.Location,
+		command.Value,
+	)
+}
+
+func (r *Renderer) executeCommandUniform3f(command CommandUniform3f) {
+	gl.Uniform3f(
+		command.Location,
+		command.Values[0],
+		command.Values[1],
+		command.Values[2],
+	)
 }
 
 func (r *Renderer) executeCommandUniform4f(command CommandUniform4f) {
@@ -386,13 +447,6 @@ func (r *Renderer) executeCommandUniform4f(command CommandUniform4f) {
 		command.Values[1],
 		command.Values[2],
 		command.Values[3],
-	)
-}
-
-func (r *Renderer) executeCommandUniform1i(command CommandUniform1i) {
-	gl.Uniform1i(
-		command.Location,
-		command.Value,
 	)
 }
 

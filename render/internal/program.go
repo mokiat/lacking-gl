@@ -29,6 +29,7 @@ func NewProgram(info render.ProgramInfo) *Program {
 }
 
 type Program struct {
+	render.ProgramObject
 	id uint32
 }
 

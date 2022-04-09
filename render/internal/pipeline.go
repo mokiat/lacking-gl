@@ -96,6 +96,14 @@ func NewPipeline(info render.PipelineInfo) *Pipeline {
 	pipeline.BlendEnabled = info.BlendEnabled
 	pipeline.BlendColor.Color = info.BlendColor
 
+	pipeline.BlendEquation.ModeRGB = glEnumFromBlendOp(info.BlendOpColor)
+	pipeline.BlendEquation.ModeAlpha = glEnumFromBlendOp(info.BlendOpAlpha)
+
+	pipeline.BlendFunc.SourceFactorRGB = glEnumFromBlendFactor(info.BlendSourceColorFactor)
+	pipeline.BlendFunc.DestinationFactorRGB = glEnumFromBlendFactor(info.BlendDestinationColorFactor)
+	pipeline.BlendFunc.SourceFactorAlpha = glEnumFromBlendFactor(info.BlendSourceAlphaFactor)
+	pipeline.BlendFunc.DestinationFactorAlpha = glEnumFromBlendFactor(info.BlendDestinationAlphaFactor)
+
 	return pipeline
 }
 
@@ -145,7 +153,62 @@ func glEnumFromStencilOp(op render.StencilOperation) uint32 {
 	}
 }
 
+func glEnumFromBlendOp(op render.BlendOperation) uint32 {
+	switch op {
+	case render.BlendOperationAdd:
+		return gl.FUNC_ADD
+	case render.BlendOperationSubtract:
+		return gl.FUNC_SUBTRACT
+	case render.BlendOperationReverseSubtract:
+		return gl.FUNC_REVERSE_SUBTRACT
+	case render.BlendOperationMin:
+		return gl.MIN
+	case render.BlendOperationMax:
+		return gl.MAX
+	default:
+		panic(fmt.Errorf("unknown op: %d", op))
+	}
+}
+
+func glEnumFromBlendFactor(factor render.BlendFactor) uint32 {
+	switch factor {
+	case render.BlendFactorZero:
+		return gl.ZERO
+	case render.BlendFactorOne:
+		return gl.ONE
+	case render.BlendFactorSourceColor:
+		return gl.SRC_COLOR
+	case render.BlendFactorOneMinusSourceColor:
+		return gl.ONE_MINUS_SRC_COLOR
+	case render.BlendFactorDestinationColor:
+		return gl.DST_COLOR
+	case render.BlendFactorOneMinusDestinationColor:
+		return gl.ONE_MINUS_DST_COLOR
+	case render.BlendFactorSourceAlpha:
+		return gl.SRC_ALPHA
+	case render.BlendFactorOneMinusSourceAlpha:
+		return gl.ONE_MINUS_SRC_ALPHA
+	case render.BlendFactorDestinationAlpha:
+		return gl.DST_ALPHA
+	case render.BlendFactorOneMinusDestinationAlpha:
+		return gl.ONE_MINUS_DST_ALPHA
+	case render.BlendFactorConstantColor:
+		return gl.CONSTANT_COLOR
+	case render.BlendFactorOneMinusConstantColor:
+		return gl.ONE_MINUS_CONSTANT_COLOR
+	case render.BlendFactorConstantAlpha:
+		return gl.CONSTANT_ALPHA
+	case render.BlendFactorOneMinusConstantAlpha:
+		return gl.ONE_MINUS_CONSTANT_ALPHA
+	case render.BlendFactorSourceAlphaSaturate:
+		return gl.SRC_ALPHA_SATURATE
+	default:
+		panic(fmt.Errorf("unknown factor: %d", factor))
+	}
+}
+
 type Pipeline struct {
+	render.PipelineObject
 	ProgramID        uint32
 	Topology         CommandTopology
 	CullTest         CommandCullTest
@@ -164,6 +227,8 @@ type Pipeline struct {
 	ColorWrite       CommandColorWrite
 	BlendEnabled     bool
 	BlendColor       CommandBlendColor
+	BlendEquation    CommandBlendEquation
+	BlendFunc        CommandBlendFunc
 	VertexArray      CommandBindVertexArray
 }
 
