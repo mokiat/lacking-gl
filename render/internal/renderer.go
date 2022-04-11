@@ -120,7 +120,6 @@ func (r *Renderer) EndRenderPass() {
 
 func (r *Renderer) BindPipeline(pipeline render.Pipeline) {
 	intPipeline := pipeline.(*Pipeline)
-
 	r.executeCommandBindPipeline(CommandBindPipeline{
 		ProgramID:        intPipeline.ProgramID,
 		Topology:         intPipeline.Topology,

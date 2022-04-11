@@ -9,6 +9,6 @@ require (
 	golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d
 )
 
-require github.com/mokiat/gomath v0.1.0 // indirect
+require github.com/mokiat/gomath v0.2.0 // indirect
 
 replace github.com/mokiat/lacking => ../lacking
