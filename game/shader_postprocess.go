@@ -3,13 +3,13 @@ package game
 import (
 	"fmt"
 
-	"github.com/mokiat/lacking/framework/opengl"
+	"github.com/mokiat/lacking-gl/internal"
 	"github.com/mokiat/lacking/game/graphics/renderapi/plugin"
 )
 
 func newPostprocessingShaderSet(mapping plugin.ToneMapping) plugin.ShaderSet {
-	vsBuilder := opengl.NewShaderSourceBuilder(tonePostprocessingVertexShader)
-	fsBuilder := opengl.NewShaderSourceBuilder(tonePostprocessingFragmentShader)
+	vsBuilder := internal.NewShaderSourceBuilder(tonePostprocessingVertexShader)
+	fsBuilder := internal.NewShaderSourceBuilder(tonePostprocessingFragmentShader)
 	switch mapping {
 	case plugin.ReinhardToneMapping:
 		fsBuilder.AddFeature("MODE_REINHARD")

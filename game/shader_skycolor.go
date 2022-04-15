@@ -1,13 +1,13 @@
 package game
 
 import (
-	"github.com/mokiat/lacking/framework/opengl"
+	"github.com/mokiat/lacking-gl/internal"
 	"github.com/mokiat/lacking/game/graphics/renderapi/plugin"
 )
 
 func newSkycolorShaderSet() plugin.ShaderSet {
-	vsBuilder := opengl.NewShaderSourceBuilder(colorSkyboxVertexShader)
-	fsBuilder := opengl.NewShaderSourceBuilder(colorSkyboxFragmentShader)
+	vsBuilder := internal.NewShaderSourceBuilder(colorSkyboxVertexShader)
+	fsBuilder := internal.NewShaderSourceBuilder(colorSkyboxFragmentShader)
 	return plugin.ShaderSet{
 		VertexShader:   vsBuilder.Build,
 		FragmentShader: fsBuilder.Build,

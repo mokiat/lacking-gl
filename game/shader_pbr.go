@@ -1,14 +1,14 @@
 package game
 
 import (
-	"github.com/mokiat/lacking/framework/opengl"
+	"github.com/mokiat/lacking-gl/internal"
 	"github.com/mokiat/lacking/game/graphics"
 	"github.com/mokiat/lacking/game/graphics/renderapi/plugin"
 )
 
 func newPBRShaderSet(definition graphics.PBRMaterialDefinition) plugin.ShaderSet {
-	vsBuilder := opengl.NewShaderSourceBuilder(pbrGeometryVertexShader)
-	fsBuilder := opengl.NewShaderSourceBuilder(pbrGeometryFragmentShader)
+	vsBuilder := internal.NewShaderSourceBuilder(pbrGeometryVertexShader)
+	fsBuilder := internal.NewShaderSourceBuilder(pbrGeometryFragmentShader)
 	if definition.AlbedoTexture != nil {
 		vsBuilder.AddFeature("USES_ALBEDO_TEXTURE")
 		fsBuilder.AddFeature("USES_ALBEDO_TEXTURE")

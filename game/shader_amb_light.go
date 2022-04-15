@@ -1,13 +1,13 @@
 package game
 
 import (
-	"github.com/mokiat/lacking/framework/opengl"
+	"github.com/mokiat/lacking-gl/internal"
 	"github.com/mokiat/lacking/game/graphics/renderapi/plugin"
 )
 
 func newAmbientLightShaderSet() plugin.ShaderSet {
-	vsBuilder := opengl.NewShaderSourceBuilder(ambientLightVertexShader)
-	fsBuilder := opengl.NewShaderSourceBuilder(ambientLightFragmentShader)
+	vsBuilder := internal.NewShaderSourceBuilder(ambientLightVertexShader)
+	fsBuilder := internal.NewShaderSourceBuilder(ambientLightFragmentShader)
 	return plugin.ShaderSet{
 		VertexShader:   vsBuilder.Build,
 		FragmentShader: fsBuilder.Build,

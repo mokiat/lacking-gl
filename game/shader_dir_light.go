@@ -1,13 +1,13 @@
 package game
 
 import (
-	"github.com/mokiat/lacking/framework/opengl"
+	"github.com/mokiat/lacking-gl/internal"
 	"github.com/mokiat/lacking/game/graphics/renderapi/plugin"
 )
 
 func newDirectionalLightShaderSet() plugin.ShaderSet {
-	vsBuilder := opengl.NewShaderSourceBuilder(directionalLightVertexShader)
-	fsBuilder := opengl.NewShaderSourceBuilder(directionalLightFragmentShader)
+	vsBuilder := internal.NewShaderSourceBuilder(directionalLightVertexShader)
+	fsBuilder := internal.NewShaderSourceBuilder(directionalLightFragmentShader)
 	return plugin.ShaderSet{
 		VertexShader:   vsBuilder.Build,
 		FragmentShader: fsBuilder.Build,

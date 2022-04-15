@@ -1,33 +1,25 @@
 package ui
 
 import (
-	"github.com/mokiat/lacking/framework/opengl"
+	"github.com/mokiat/lacking-gl/internal"
 	"github.com/mokiat/lacking/ui/renderapi/plugin"
 )
 
 func newShapeShaders() plugin.ShaderSet {
+	vsBuilder := internal.NewShaderSourceBuilder(shapeMaterialVertexShaderTemplate)
+	fsBuilder := internal.NewShaderSourceBuilder(shapeMaterialFragmentShaderTemplate)
 	return plugin.ShaderSet{
-		VertexShader: func() string {
-			builder := opengl.NewShaderSourceBuilder(shapeMaterialVertexShaderTemplate)
-			return builder.Build()
-		},
-		FragmentShader: func() string {
-			builder := opengl.NewShaderSourceBuilder(shapeMaterialFragmentShaderTemplate)
-			return builder.Build()
-		},
+		VertexShader:   vsBuilder.Build,
+		FragmentShader: fsBuilder.Build,
 	}
 }
 
 func newShapeBlankShaders() plugin.ShaderSet {
+	vsBuilder := internal.NewShaderSourceBuilder(shapeBlankMaterialVertexShaderTemplate)
+	fsBuilder := internal.NewShaderSourceBuilder(shapeBlankMaterialFragmentShaderTemplate)
 	return plugin.ShaderSet{
-		VertexShader: func() string {
-			builder := opengl.NewShaderSourceBuilder(shapeBlankMaterialVertexShaderTemplate)
-			return builder.Build()
-		},
-		FragmentShader: func() string {
-			builder := opengl.NewShaderSourceBuilder(shapeBlankMaterialFragmentShaderTemplate)
-			return builder.Build()
-		},
+		VertexShader:   vsBuilder.Build,
+		FragmentShader: fsBuilder.Build,
 	}
 }
 

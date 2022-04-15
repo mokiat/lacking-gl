@@ -1,20 +1,16 @@
 package ui
 
 import (
-	"github.com/mokiat/lacking/framework/opengl"
+	"github.com/mokiat/lacking-gl/internal"
 	"github.com/mokiat/lacking/ui/renderapi/plugin"
 )
 
 func newTextShaders() plugin.ShaderSet {
+	vsBuilder := internal.NewShaderSourceBuilder(textMaterialVertexShaderTemplate)
+	fsBuilder := internal.NewShaderSourceBuilder(textMaterialFragmentShaderTemplate)
 	return plugin.ShaderSet{
-		VertexShader: func() string {
-			builder := opengl.NewShaderSourceBuilder(textMaterialVertexShaderTemplate)
-			return builder.Build()
-		},
-		FragmentShader: func() string {
-			builder := opengl.NewShaderSourceBuilder(textMaterialFragmentShaderTemplate)
-			return builder.Build()
-		},
+		VertexShader:   vsBuilder.Build,
+		FragmentShader: fsBuilder.Build,
 	}
 }
 
