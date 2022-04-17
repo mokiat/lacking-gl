@@ -2,13 +2,13 @@ package game
 
 import (
 	"github.com/mokiat/lacking-gl/internal"
-	"github.com/mokiat/lacking/game/graphics/renderapi/plugin"
+	"github.com/mokiat/lacking/game/graphics"
 )
 
-func newAmbientLightShaderSet() plugin.ShaderSet {
+func newAmbientLightShaderSet() graphics.ShaderSet {
 	vsBuilder := internal.NewShaderSourceBuilder(ambientLightVertexShader)
 	fsBuilder := internal.NewShaderSourceBuilder(ambientLightFragmentShader)
-	return plugin.ShaderSet{
+	return graphics.ShaderSet{
 		VertexShader:   vsBuilder.Build,
 		FragmentShader: fsBuilder.Build,
 	}

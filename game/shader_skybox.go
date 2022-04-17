@@ -2,13 +2,13 @@ package game
 
 import (
 	"github.com/mokiat/lacking-gl/internal"
-	"github.com/mokiat/lacking/game/graphics/renderapi/plugin"
+	"github.com/mokiat/lacking/game/graphics"
 )
 
-func newSkyboxShaderSet() plugin.ShaderSet {
+func newSkyboxShaderSet() graphics.ShaderSet {
 	vsBuilder := internal.NewShaderSourceBuilder(cubeSkyboxVertexShader)
 	fsBuilder := internal.NewShaderSourceBuilder(cubeSkyboxFragmentShader)
-	return plugin.ShaderSet{
+	return graphics.ShaderSet{
 		VertexShader:   vsBuilder.Build,
 		FragmentShader: fsBuilder.Build,
 	}

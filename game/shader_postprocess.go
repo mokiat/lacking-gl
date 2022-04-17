@@ -4,21 +4,21 @@ import (
 	"fmt"
 
 	"github.com/mokiat/lacking-gl/internal"
-	"github.com/mokiat/lacking/game/graphics/renderapi/plugin"
+	"github.com/mokiat/lacking/game/graphics"
 )
 
-func newPostprocessingShaderSet(mapping plugin.ToneMapping) plugin.ShaderSet {
+func newPostprocessingShaderSet(mapping graphics.ToneMapping) graphics.ShaderSet {
 	vsBuilder := internal.NewShaderSourceBuilder(tonePostprocessingVertexShader)
 	fsBuilder := internal.NewShaderSourceBuilder(tonePostprocessingFragmentShader)
 	switch mapping {
-	case plugin.ReinhardToneMapping:
+	case graphics.ReinhardToneMapping:
 		fsBuilder.AddFeature("MODE_REINHARD")
-	case plugin.ExponentialToneMapping:
+	case graphics.ExponentialToneMapping:
 		fsBuilder.AddFeature("MODE_EXPONENTIAL")
 	default:
 		panic(fmt.Errorf("unknown tone mapping mode: %s", mapping))
 	}
-	return plugin.ShaderSet{
+	return graphics.ShaderSet{
 		VertexShader:   vsBuilder.Build,
 		FragmentShader: fsBuilder.Build,
 	}

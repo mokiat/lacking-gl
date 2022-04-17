@@ -2,13 +2,13 @@ package game
 
 import (
 	"github.com/mokiat/lacking-gl/internal"
-	"github.com/mokiat/lacking/game/graphics/renderapi/plugin"
+	"github.com/mokiat/lacking/game/graphics"
 )
 
-func newExposureShaderSet() plugin.ShaderSet {
+func newExposureShaderSet() graphics.ShaderSet {
 	vsBuilder := internal.NewShaderSourceBuilder(exposureVertexShader)
 	fsBuilder := internal.NewShaderSourceBuilder(exposureFragmentShader)
-	return plugin.ShaderSet{
+	return graphics.ShaderSet{
 		VertexShader:   vsBuilder.Build,
 		FragmentShader: fsBuilder.Build,
 	}
