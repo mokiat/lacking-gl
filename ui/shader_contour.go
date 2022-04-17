@@ -2,13 +2,13 @@ package ui
 
 import (
 	"github.com/mokiat/lacking-gl/internal"
-	"github.com/mokiat/lacking/ui/renderapi/plugin"
+	"github.com/mokiat/lacking/ui"
 )
 
-func newContourShaders() plugin.ShaderSet {
+func newContourShaders() ui.ShaderSet {
 	vsBuilder := internal.NewShaderSourceBuilder(contourMaterialVertexShaderTemplate)
 	fsBuilder := internal.NewShaderSourceBuilder(contourMaterialFragmentShaderTemplate)
-	return plugin.ShaderSet{
+	return ui.ShaderSet{
 		VertexShader:   vsBuilder.Build,
 		FragmentShader: fsBuilder.Build,
 	}
