@@ -13,5 +13,3 @@ require (
 	github.com/mokiat/gomath v0.2.0 // indirect
 	golang.org/x/text v0.3.7 // indirect
 )
-
-replace github.com/mokiat/lacking => ../lacking
