@@ -272,6 +272,9 @@ func (r *Renderer) SubmitQueue(queue *CommandQueue) {
 		case CommandKindDrawIndexed:
 			command := PopCommand[CommandDrawIndexed](queue)
 			r.executeCommandDrawIndexed(command)
+		case CommandKindCopyContentToBuffer:
+			command := PopCommand[CommandCopyContentToBuffer](queue)
+			r.executeCommandCopyContentToBuffer(command)
 		default:
 			panic(fmt.Errorf("unknown command kind: %v", header.Kind))
 		}
@@ -488,5 +491,25 @@ func (r *Renderer) executeCommandDrawIndexed(command CommandDrawIndexed) {
 		r.indexType,
 		gl.PtrOffset(int(command.IndexOffset)),
 		command.InstanceCount,
+	)
+}
+
+func (r *Renderer) executeCommandCopyContentToBuffer(command CommandCopyContentToBuffer) {
+	gl.BindBuffer(
+		gl.PIXEL_PACK_BUFFER,
+		command.BufferID,
+	)
+	gl.ReadPixels(
+		command.X,
+		command.Y,
+		command.Width,
+		command.Height,
+		command.Format,
+		command.XType,
+		gl.PtrOffset(0),
+	)
+	gl.BindBuffer(
+		gl.PIXEL_PACK_BUFFER,
+		0,
 	)
 }

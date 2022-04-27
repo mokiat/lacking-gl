@@ -41,6 +41,10 @@ func (b *Buffer) Update(info render.BufferUpdateInfo) {
 	gl.NamedBufferSubData(b.id, info.Offset, len(info.Data), gl.Ptr(info.Data))
 }
 
+func (b *Buffer) Fetch(info render.BufferFetchInfo) {
+	gl.GetNamedBufferSubData(b.id, info.Offset, len(info.Target), gl.Ptr(&info.Target[0]))
+}
+
 func (b *Buffer) Release() {
 	gl.DeleteBuffers(1, &b.id)
 	b.id = 0
