@@ -17,10 +17,12 @@ type Fence struct {
 }
 
 func (f *Fence) Status() render.FenceStatus {
-	switch gl.ClientWaitSync(f.id, gl.SYNC_FLUSH_COMMANDS_BIT, 0) {
-	case gl.ALREADY_SIGNALED, gl.CONDITION_SATISFIED:
+	var status, count int32
+	gl.GetSynciv(f.id, gl.SYNC_STATUS, 1, &count, &status)
+	switch status {
+	case gl.SIGNALED:
 		return render.FenceStatusSuccess
-	case gl.TIMEOUT_EXPIRED:
+	case gl.UNSIGNALED:
 		return render.FenceStatusNotReady
 	default:
 		return render.FenceStatusDeviceLost
