@@ -20,7 +20,7 @@ layout(location = 1) in vec2 texCoordIn;
 
 uniform mat4 transformMatrixIn;
 uniform mat4 projectionMatrixIn;
-uniform vec4 clipDistancesIn;
+uniform mat4 clipMatrixIn;
 
 out gl_PerVertex
 {
@@ -34,10 +34,13 @@ void main()
 {
 	texCoordInOut = texCoordIn;
 	vec4 screenPosition = transformMatrixIn * vec4(positionIn, 0.0, 1.0);
-	gl_ClipDistance[0] = screenPosition.x - clipDistancesIn.x; // left
-	gl_ClipDistance[1] = clipDistancesIn.y - screenPosition.x; // right
-	gl_ClipDistance[2] = screenPosition.y - clipDistancesIn.z; // top
-	gl_ClipDistance[3] = clipDistancesIn.w - screenPosition.y; // bottom
+
+	vec4 clipValues = clipMatrixIn * screenPosition;
+	gl_ClipDistance[0] = clipValues.x;
+	gl_ClipDistance[1] = clipValues.y;
+	gl_ClipDistance[2] = clipValues.z;
+	gl_ClipDistance[3] = clipValues.w;
+	
 	gl_Position = projectionMatrixIn * screenPosition;
 }
 `
