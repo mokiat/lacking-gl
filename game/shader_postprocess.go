@@ -55,5 +55,6 @@ void main()
 	vec3 ldr = vec3(1.0) - exp2(-exposedHDR);
 	#endif
 	fbColor0Out = vec4(ldr, 1.0);
+	fbColor0Out.rgb = pow(fbColor0Out.rgb, vec3(1.0/2.2));
 }
 `

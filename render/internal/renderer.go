@@ -21,7 +21,6 @@ type Renderer struct {
 }
 
 func (r *Renderer) BeginRenderPass(info render.RenderPassInfo) {
-	gl.Enable(gl.FRAMEBUFFER_SRGB)
 	gl.Enable(gl.CLIP_DISTANCE0)
 	gl.Enable(gl.CLIP_DISTANCE1)
 	gl.Enable(gl.CLIP_DISTANCE2)
