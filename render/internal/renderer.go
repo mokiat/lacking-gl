@@ -124,7 +124,6 @@ func (r *Renderer) BindPipeline(pipeline render.Pipeline) {
 		Topology:         intPipeline.Topology,
 		CullTest:         intPipeline.CullTest,
 		FrontFace:        intPipeline.FrontFace,
-		LineWidth:        intPipeline.LineWidth,
 		DepthTest:        intPipeline.DepthTest,
 		DepthWrite:       intPipeline.DepthWrite,
 		DepthComparison:  intPipeline.DepthComparison,
@@ -235,9 +234,6 @@ func (r *Renderer) SubmitQueue(queue *CommandQueue) {
 		case CommandKindFrontFace:
 			command := PopCommand[CommandFrontFace](queue)
 			r.executeCommandFrontFace(command)
-		case CommandKindLineWidth:
-			command := PopCommand[CommandLineWidth](queue)
-			r.executeCommandLineWidth(command)
 		case CommandKindDepthTest:
 			command := PopCommand[CommandDepthTest](queue)
 			r.executeCommandDepthTest(command)
@@ -286,8 +282,6 @@ func (r *Renderer) executeCommandBindPipeline(command CommandBindPipeline) {
 	r.executeCommandTopology(command.Topology)
 	r.executeCommandCullTest(command.CullTest)
 	r.executeCommandFrontFace(command.FrontFace)
-	// TODO: Only if line-type topology
-	r.executeCommandLineWidth(command.LineWidth)
 	r.executeCommandDepthTest(command.DepthTest)
 	r.executeCommandDepthWrite(command.DepthWrite)
 	if command.DepthTest.Enabled {
@@ -333,12 +327,6 @@ func (r *Renderer) executeCommandCullTest(command CommandCullTest) {
 
 func (r *Renderer) executeCommandFrontFace(command CommandFrontFace) {
 	gl.FrontFace(command.Orientation)
-}
-
-func (r *Renderer) executeCommandLineWidth(command CommandLineWidth) {
-	if command.Width > 0.0 {
-		gl.LineWidth(command.Width)
-	}
 }
 
 func (r *Renderer) executeCommandDepthTest(command CommandDepthTest) {
