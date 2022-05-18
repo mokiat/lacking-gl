@@ -35,7 +35,6 @@ func (q *CommandQueue) BindPipeline(pipeline render.Pipeline) {
 		Topology:         intPipeline.Topology,
 		CullTest:         intPipeline.CullTest,
 		FrontFace:        intPipeline.FrontFace,
-		LineWidth:        intPipeline.LineWidth,
 		DepthTest:        intPipeline.DepthTest,
 		DepthWrite:       intPipeline.DepthWrite,
 		DepthComparison:  intPipeline.DepthComparison,
@@ -146,6 +145,9 @@ func (q *CommandQueue) CopyContentToBuffer(info render.CopyContentToBufferInfo) 
 	case render.DataFormatRGBA8:
 		format = gl.RGBA
 		xtype = gl.UNSIGNED_BYTE
+	case render.DataFormatRGBA16F:
+		format = gl.RGBA
+		xtype = gl.HALF_FLOAT
 	case render.DataFormatRGBA32F:
 		format = gl.RGBA
 		xtype = gl.FLOAT
@@ -192,7 +194,6 @@ const (
 	CommandKindTopology
 	CommandKindCullTest
 	CommandKindFrontFace
-	CommandKindLineWidth
 	CommandKindDepthTest
 	CommandKindDepthWrite
 	CommandKindDepthComparison
@@ -225,7 +226,6 @@ type CommandBindPipeline struct {
 	Topology         CommandTopology
 	CullTest         CommandCullTest
 	FrontFace        CommandFrontFace
-	LineWidth        CommandLineWidth
 	DepthTest        CommandDepthTest
 	DepthWrite       CommandDepthWrite
 	DepthComparison  CommandDepthComparison
@@ -257,10 +257,6 @@ type CommandFrontFace struct {
 	Orientation uint32
 }
 
-type CommandLineWidth struct {
-	Width float32
-}
-
 type CommandDepthTest struct {
 	Enabled bool
 }
@@ -287,7 +283,7 @@ type CommandStencilOperation struct {
 type CommandStencilFunc struct {
 	Face uint32
 	Func uint32
-	Ref  uint32
+	Ref  int32
 	Mask uint32
 }
 
