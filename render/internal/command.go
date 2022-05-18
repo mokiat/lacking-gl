@@ -283,7 +283,7 @@ type CommandStencilOperation struct {
 type CommandStencilFunc struct {
 	Face uint32
 	Func uint32
-	Ref  uint32
+	Ref  int32
 	Mask uint32
 }
 
