@@ -3,16 +3,16 @@ package app
 import (
 	"fmt"
 	"image"
-	"os"
 
 	_ "image/jpeg"
 	_ "image/png"
 
+	"github.com/mokiat/lacking/util/resource"
 	_ "golang.org/x/image/bmp"
 )
 
-func openImage(path string) (image.Image, error) {
-	in, err := os.Open(path)
+func openImage(locator resource.ReadLocator, path string) (image.Image, error) {
+	in, err := locator.ReadResource(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %w", err)
 	}

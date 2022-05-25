@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/mokiat/lacking/app"
+	"github.com/mokiat/lacking/util/resource"
 )
 
 const (
@@ -13,8 +14,9 @@ const (
 	taskProcessingTimeout = 30 * time.Millisecond
 )
 
-func newLoop(title string, window *glfw.Window, controller app.Controller) *loop {
+func newLoop(locator resource.ReadLocator, title string, window *glfw.Window, controller app.Controller) *loop {
 	return &loop{
+		locator:       locator,
 		title:         title,
 		window:        window,
 		controller:    controller,
@@ -29,6 +31,7 @@ func newLoop(title string, window *glfw.Window, controller app.Controller) *loop
 var _ app.Window = (*loop)(nil)
 
 type loop struct {
+	locator       resource.ReadLocator
 	title         string
 	window        *glfw.Window
 	controller    app.Controller
@@ -170,7 +173,7 @@ func (l *loop) Invalidate() {
 }
 
 func (l *loop) CreateCursor(definition app.CursorDefinition) app.Cursor {
-	img, err := openImage(definition.Path)
+	img, err := openImage(l.locator, definition.Path)
 	if err != nil {
 		panic(fmt.Errorf("failed to open cursor %q: %w", definition.Path, err))
 	}

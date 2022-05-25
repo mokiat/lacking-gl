@@ -65,7 +65,7 @@ func Run(cfg *Config, controller app.Controller) error {
 	}
 
 	if cfg.icon != "" {
-		img, err := openImage(cfg.icon)
+		img, err := openImage(cfg.locator, cfg.icon)
 		if err != nil {
 			return fmt.Errorf("failed to open icon %q: %w", cfg.icon, err)
 		}
@@ -99,7 +99,7 @@ func Run(cfg *Config, controller app.Controller) error {
 		}, gl.PtrOffset(0))
 	}
 
-	l := newLoop(cfg.title, window, controller)
+	l := newLoop(cfg.locator, cfg.title, window, controller)
 
 	if cfg.cursor != nil {
 		cursor := l.CreateCursor(*cfg.cursor)
