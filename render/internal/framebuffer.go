@@ -61,3 +61,36 @@ func (f *Framebuffer) Release() {
 	f.id = 0
 	f.activeDrawBuffers = [4]bool{}
 }
+
+func DetermineContentFormat(framebuffer render.Framebuffer) render.DataFormat {
+	fb := framebuffer.(*Framebuffer)
+	gl.BindFramebuffer(gl.FRAMEBUFFER, fb.id)
+	defer func() {
+		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	}()
+	var glFormat int32
+	gl.GetNamedFramebufferParameteriv(
+		fb.id,
+		gl.IMPLEMENTATION_COLOR_READ_FORMAT,
+		&glFormat,
+	)
+	if glFormat != gl.RGBA {
+		return render.DataFormatUnsupported
+	}
+	var glType int32
+	gl.GetNamedFramebufferParameteriv(
+		fb.id,
+		gl.IMPLEMENTATION_COLOR_READ_TYPE,
+		&glType,
+	)
+	switch glType {
+	case gl.UNSIGNED_BYTE:
+		return render.DataFormatRGBA8
+	case gl.HALF_FLOAT:
+		return render.DataFormatRGBA16F
+	case gl.FLOAT:
+		return render.DataFormatRGBA32F
+	default:
+		return render.DataFormatUnsupported
+	}
+}
