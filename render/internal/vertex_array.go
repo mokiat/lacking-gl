@@ -30,7 +30,7 @@ func NewVertexArray(info render.VertexArrayInfo) *VertexArray {
 
 	return &VertexArray{
 		id:          id,
-		indexFormat: gl.UNSIGNED_SHORT, // FIXME
+		indexFormat: glIndexFormat(info.IndexFormat),
 	}
 }
 
@@ -139,5 +139,16 @@ func glAttribParams(format render.VertexAttributeFormat) (int32, uint32, bool) {
 
 	default:
 		panic(fmt.Errorf("unknown attribute format: %d", format))
+	}
+}
+
+func glIndexFormat(format render.IndexFormat) uint32 {
+	switch format {
+	case render.IndexFormatUnsignedShort:
+		return gl.UNSIGNED_SHORT
+	case render.IndexFormatUnsignedInt:
+		return gl.UNSIGNED_INT
+	default:
+		panic(fmt.Errorf("unknown index format: %d", format))
 	}
 }
