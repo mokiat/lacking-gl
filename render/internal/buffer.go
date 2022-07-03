@@ -17,6 +17,10 @@ func NewPixelTransferBuffer(info render.BufferInfo) render.Buffer {
 	return newBuffer(info)
 }
 
+func NewUniformBuffer(info render.BufferInfo) render.Buffer {
+	return newBuffer(info)
+}
+
 func newBuffer(info render.BufferInfo) *Buffer {
 	var id uint32
 	gl.CreateBuffers(1, &id)
