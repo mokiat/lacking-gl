@@ -19,8 +19,12 @@ func NewVertexArray(info render.VertexArrayInfo) *VertexArray {
 
 	for _, attribute := range info.Attributes {
 		gl.EnableVertexArrayAttrib(id, uint32(attribute.Location))
-		count, compType, normalized := glAttribParams(attribute.Format)
-		gl.VertexArrayAttribFormat(id, uint32(attribute.Location), count, compType, normalized, uint32(attribute.Offset))
+		count, compType, normalized, integer := glAttribParams(attribute.Format)
+		if integer {
+			gl.VertexArrayAttribIFormat(id, uint32(attribute.Location), count, compType, uint32(attribute.Offset))
+		} else {
+			gl.VertexArrayAttribFormat(id, uint32(attribute.Location), count, compType, normalized, uint32(attribute.Offset))
+		}
 		gl.VertexArrayAttribBinding(id, uint32(attribute.Location), uint32(attribute.Binding))
 	}
 
@@ -45,97 +49,106 @@ func (a *VertexArray) Release() {
 	a.id = 0
 }
 
-func glAttribParams(format render.VertexAttributeFormat) (int32, uint32, bool) {
+func glAttribParams(format render.VertexAttributeFormat) (int32, uint32, bool, bool) {
 	switch format {
 	case render.VertexAttributeFormatR32F:
-		return 1, gl.FLOAT, false
+		return 1, gl.FLOAT, false, false
 	case render.VertexAttributeFormatRG32F:
-		return 2, gl.FLOAT, false
+		return 2, gl.FLOAT, false, false
 	case render.VertexAttributeFormatRGB32F:
-		return 3, gl.FLOAT, false
+		return 3, gl.FLOAT, false, false
 	case render.VertexAttributeFormatRGBA32F:
-		return 4, gl.FLOAT, false
+		return 4, gl.FLOAT, false, false
 
 	case render.VertexAttributeFormatR16F:
-		return 1, gl.HALF_FLOAT, false
+		return 1, gl.HALF_FLOAT, false, false
 	case render.VertexAttributeFormatRG16F:
-		return 2, gl.HALF_FLOAT, false
+		return 2, gl.HALF_FLOAT, false, false
 	case render.VertexAttributeFormatRGB16F:
-		return 3, gl.HALF_FLOAT, false
+		return 3, gl.HALF_FLOAT, false, false
 	case render.VertexAttributeFormatRGBA16F:
-		return 4, gl.HALF_FLOAT, false
+		return 4, gl.HALF_FLOAT, false, false
 
 	case render.VertexAttributeFormatR16S:
-		return 1, gl.SHORT, false
+		return 1, gl.SHORT, false, false
 	case render.VertexAttributeFormatRG16S:
-		return 2, gl.SHORT, false
+		return 2, gl.SHORT, false, false
 	case render.VertexAttributeFormatRGB16S:
-		return 3, gl.SHORT, false
+		return 3, gl.SHORT, false, false
 	case render.VertexAttributeFormatRGBA16S:
-		return 4, gl.SHORT, false
+		return 4, gl.SHORT, false, false
 
 	case render.VertexAttributeFormatR16SN:
-		return 1, gl.SHORT, true
+		return 1, gl.SHORT, true, false
 	case render.VertexAttributeFormatRG16SN:
-		return 2, gl.SHORT, true
+		return 2, gl.SHORT, true, false
 	case render.VertexAttributeFormatRGB16SN:
-		return 3, gl.SHORT, true
+		return 3, gl.SHORT, true, false
 	case render.VertexAttributeFormatRGBA16SN:
-		return 4, gl.SHORT, true
+		return 4, gl.SHORT, true, false
 
 	case render.VertexAttributeFormatR16U:
-		return 1, gl.UNSIGNED_SHORT, false
+		return 1, gl.UNSIGNED_SHORT, false, false
 	case render.VertexAttributeFormatRG16U:
-		return 2, gl.UNSIGNED_SHORT, false
+		return 2, gl.UNSIGNED_SHORT, false, false
 	case render.VertexAttributeFormatRGB16U:
-		return 3, gl.UNSIGNED_SHORT, false
+		return 3, gl.UNSIGNED_SHORT, false, false
 	case render.VertexAttributeFormatRGBA16U:
-		return 4, gl.UNSIGNED_SHORT, false
+		return 4, gl.UNSIGNED_SHORT, false, false
 
 	case render.VertexAttributeFormatR16UN:
-		return 1, gl.UNSIGNED_SHORT, true
+		return 1, gl.UNSIGNED_SHORT, true, false
 	case render.VertexAttributeFormatRG16UN:
-		return 2, gl.UNSIGNED_SHORT, true
+		return 2, gl.UNSIGNED_SHORT, true, false
 	case render.VertexAttributeFormatRGB16UN:
-		return 3, gl.UNSIGNED_SHORT, true
+		return 3, gl.UNSIGNED_SHORT, true, false
 	case render.VertexAttributeFormatRGBA16UN:
-		return 4, gl.UNSIGNED_SHORT, true
+		return 4, gl.UNSIGNED_SHORT, true, false
 
 	case render.VertexAttributeFormatR8S:
-		return 1, gl.BYTE, false
+		return 1, gl.BYTE, false, false
 	case render.VertexAttributeFormatRG8S:
-		return 2, gl.BYTE, false
+		return 2, gl.BYTE, false, false
 	case render.VertexAttributeFormatRGB8S:
-		return 3, gl.BYTE, false
+		return 3, gl.BYTE, false, false
 	case render.VertexAttributeFormatRGBA8S:
-		return 4, gl.BYTE, false
+		return 4, gl.BYTE, false, false
 
 	case render.VertexAttributeFormatR8SN:
-		return 1, gl.BYTE, true
+		return 1, gl.BYTE, true, false
 	case render.VertexAttributeFormatRG8SN:
-		return 2, gl.BYTE, true
+		return 2, gl.BYTE, true, false
 	case render.VertexAttributeFormatRGB8SN:
-		return 3, gl.BYTE, true
+		return 3, gl.BYTE, true, false
 	case render.VertexAttributeFormatRGBA8SN:
-		return 4, gl.BYTE, true
+		return 4, gl.BYTE, true, false
 
 	case render.VertexAttributeFormatR8U:
-		return 1, gl.UNSIGNED_BYTE, false
+		return 1, gl.UNSIGNED_BYTE, false, false
 	case render.VertexAttributeFormatRG8U:
-		return 2, gl.UNSIGNED_BYTE, false
+		return 2, gl.UNSIGNED_BYTE, false, false
 	case render.VertexAttributeFormatRGB8U:
-		return 3, gl.UNSIGNED_BYTE, false
+		return 3, gl.UNSIGNED_BYTE, false, false
 	case render.VertexAttributeFormatRGBA8U:
-		return 4, gl.UNSIGNED_BYTE, false
+		return 4, gl.UNSIGNED_BYTE, false, false
 
 	case render.VertexAttributeFormatR8UN:
-		return 1, gl.UNSIGNED_BYTE, true
+		return 1, gl.UNSIGNED_BYTE, true, false
 	case render.VertexAttributeFormatRG8UN:
-		return 2, gl.UNSIGNED_BYTE, true
+		return 2, gl.UNSIGNED_BYTE, true, false
 	case render.VertexAttributeFormatRGB8UN:
-		return 3, gl.UNSIGNED_BYTE, true
+		return 3, gl.UNSIGNED_BYTE, true, false
 	case render.VertexAttributeFormatRGBA8UN:
-		return 4, gl.UNSIGNED_BYTE, true
+		return 4, gl.UNSIGNED_BYTE, true, false
+
+	case render.VertexAttributeFormatR8IU:
+		return 1, gl.UNSIGNED_BYTE, false, true
+	case render.VertexAttributeFormatRG8IU:
+		return 2, gl.UNSIGNED_BYTE, false, true
+	case render.VertexAttributeFormatRGB8IU:
+		return 3, gl.UNSIGNED_BYTE, false, true
+	case render.VertexAttributeFormatRGBA8IU:
+		return 4, gl.UNSIGNED_BYTE, false, true
 
 	default:
 		panic(fmt.Errorf("unknown attribute format: %d", format))
