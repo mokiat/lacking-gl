@@ -35,9 +35,12 @@ layout(binding = 3) uniform sampler2D fbDepthTextureIn;
 layout(binding = 4) uniform samplerCube reflectionTextureIn;
 layout(binding = 5) uniform samplerCube refractionTextureIn;
 
-uniform mat4 projectionMatrixIn;
-uniform mat4 viewMatrixIn;
-uniform mat4 cameraMatrixIn;
+layout (binding = 0, std140) uniform Camera
+{
+	mat4 projectionMatrixIn;
+	mat4 viewMatrixIn;
+	mat4 cameraMatrixIn;
+};
 
 noperspective in vec2 texCoordInOut;
 

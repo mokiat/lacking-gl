@@ -33,9 +33,13 @@ layout(binding = 0) uniform sampler2D fbColor0TextureIn;
 layout(binding = 1) uniform sampler2D fbColor1TextureIn;
 layout(binding = 3) uniform sampler2D fbDepthTextureIn;
 
-uniform mat4 projectionMatrixIn;
-uniform mat4 viewMatrixIn;
-uniform mat4 cameraMatrixIn;
+layout (binding = 0, std140) uniform Camera
+{
+	mat4 projectionMatrixIn;
+	mat4 viewMatrixIn;
+	mat4 cameraMatrixIn;
+};
+
 uniform vec3 lightDirectionIn;
 uniform vec3 lightIntensityIn = vec3(1.0, 1.0, 1.0);
 
