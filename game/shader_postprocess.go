@@ -39,7 +39,8 @@ void main()
 const tonePostprocessingFragmentShader = `
 layout(location = 0) out vec4 fbColor0Out;
 
-uniform sampler2D fbColor0TextureIn;
+layout(binding = 0) uniform sampler2D fbColor0TextureIn;
+
 uniform float exposureIn = 1.0;
 
 noperspective in vec2 texCoordInOut;

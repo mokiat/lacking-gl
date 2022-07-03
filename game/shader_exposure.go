@@ -26,7 +26,7 @@ void main()
 const exposureFragmentShader = `
 layout(location = 0) out vec4 fbColor0Out;
 
-uniform sampler2D fbColor0TextureIn;
+layout(binding = 0) uniform sampler2D fbColor0TextureIn;
 
 void main()
 {

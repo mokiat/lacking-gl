@@ -29,11 +29,12 @@ void main()
 const ambientLightFragmentShader = `
 layout(location = 0) out vec4 fbColor0Out;
 
-uniform sampler2D fbColor0TextureIn;
-uniform sampler2D fbColor1TextureIn;
-uniform sampler2D fbDepthTextureIn;
-uniform samplerCube reflectionTextureIn;
-uniform samplerCube refractionTextureIn;
+layout(binding = 0) uniform sampler2D fbColor0TextureIn;
+layout(binding = 1) uniform sampler2D fbColor1TextureIn;
+layout(binding = 3) uniform sampler2D fbDepthTextureIn;
+layout(binding = 4) uniform samplerCube reflectionTextureIn;
+layout(binding = 5) uniform samplerCube refractionTextureIn;
+
 uniform mat4 projectionMatrixIn;
 uniform mat4 viewMatrixIn;
 uniform mat4 cameraMatrixIn;

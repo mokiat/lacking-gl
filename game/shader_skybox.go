@@ -42,7 +42,7 @@ void main()
 const cubeSkyboxFragmentShader = `
 layout(location = 0) out vec4 fbColor0Out;
 
-uniform samplerCube albedoCubeTextureIn;
+layout(binding = 0) uniform samplerCube albedoCubeTextureIn;
 
 smooth in vec3 texCoordInOut;
 

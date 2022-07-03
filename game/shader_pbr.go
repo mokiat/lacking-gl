@@ -51,7 +51,7 @@ layout(location = 0) out vec4 fbColor0Out;
 layout(location = 1) out vec4 fbColor1Out;
 
 #if defined(USES_ALBEDO_TEXTURE)
-uniform sampler2D albedoTwoDTextureIn;
+layout(binding = 0) uniform sampler2D albedoTwoDTextureIn;
 #endif
 uniform vec4 albedoColorIn = vec4(0.5, 0.0, 0.5, 1.0);
 
