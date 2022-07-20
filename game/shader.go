@@ -73,6 +73,10 @@ func newPBRShaderSet(definition graphics.PBRMaterialDefinition) graphics.ShaderS
 		vsBuilder.AddFeature("USES_TEX_COORD0")
 		fsBuilder.AddFeature("USES_TEX_COORD0")
 	}
+	if definition.AlphaTesting {
+		vsBuilder.AddFeature("USES_ALPHA_TEST")
+		fsBuilder.AddFeature("USES_ALPHA_TEST")
+	}
 	return graphics.ShaderSet{
 		VertexShader:   vsBuilder.Build,
 		FragmentShader: fsBuilder.Build,

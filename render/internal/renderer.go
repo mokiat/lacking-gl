@@ -52,6 +52,7 @@ func NewRenderer() *Renderer {
 type Renderer struct {
 	framebuffer           *Framebuffer
 	invalidateAttachments []uint32
+	program               uint32
 	topology              uint32
 	indexType             uint32
 
@@ -208,6 +209,7 @@ func (r *Renderer) EndRenderPass() {
 }
 
 func (r *Renderer) Invalidate() {
+	r.program = 0
 	r.isDirty = true
 	r.isInvalidated = true
 }
@@ -387,6 +389,10 @@ func (r *Renderer) SubmitQueue(queue *CommandQueue) {
 		case CommandKindCopyContentToBuffer:
 			command := PopCommand[CommandCopyContentToBuffer](queue)
 			r.executeCommandCopyContentToBuffer(command)
+		case CommandKindUpdateBufferData:
+			command := PopCommand[CommandUpdateBufferData](queue)
+			data := PopData(queue, command.Count)
+			r.executeCommandUpdateBufferData(command, data)
 		default:
 			panic(fmt.Errorf("unknown command kind: %v", header.Kind))
 		}
@@ -395,7 +401,10 @@ func (r *Renderer) SubmitQueue(queue *CommandQueue) {
 }
 
 func (r *Renderer) executeCommandBindPipeline(command CommandBindPipeline) {
-	gl.UseProgram(command.ProgramID)
+	if r.program != command.ProgramID {
+		r.program = command.ProgramID
+		gl.UseProgram(command.ProgramID)
+	}
 	r.executeCommandTopology(command.Topology)
 	r.executeCommandCullTest(command.CullTest)
 	r.executeCommandFrontFace(command.FrontFace)
@@ -635,6 +644,10 @@ func (r *Renderer) executeCommandCopyContentToBuffer(command CommandCopyContentT
 		gl.PIXEL_PACK_BUFFER,
 		0,
 	)
+}
+
+func (r *Renderer) executeCommandUpdateBufferData(command CommandUpdateBufferData, data []byte) {
+	gl.NamedBufferSubData(command.BufferID, int(command.Offset), len(data), gl.Ptr(data))
 }
 
 func (r *Renderer) validateState() {
