@@ -13,7 +13,7 @@ layout (binding = 0, std140) uniform Camera
 
 layout (binding = 1, std140) uniform Model
 {
-	mat4 modelMatrixIn;
+	mat4 modelMatrixIn[256];
 };
 
 smooth out vec3 normalInOut;
@@ -26,6 +26,7 @@ void main()
 #if defined(USES_TEX_COORD0)
 	texCoordInOut = texCoordIn;
 #endif
-	normalInOut = inverse(transpose(mat3(modelMatrixIn))) * normalIn;
-	gl_Position = projectionMatrixIn * (viewMatrixIn * (modelMatrixIn * coordIn));
+	mat4 modelMatrix = modelMatrixIn[gl_InstanceID];
+	normalInOut = inverse(transpose(mat3(modelMatrix))) * normalIn;
+	gl_Position = projectionMatrixIn * (viewMatrixIn * (modelMatrix * coordIn));
 }
