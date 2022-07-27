@@ -57,7 +57,7 @@ func (b *Buffer) Release() {
 func glBufferFlags(dynamic bool) uint32 {
 	var flags uint32
 	if dynamic {
-		flags |= gl.DYNAMIC_STORAGE_BIT
+		flags |= gl.DYNAMIC_STORAGE_BIT | gl.CLIENT_STORAGE_BIT
 	}
 	return flags
 }
