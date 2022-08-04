@@ -27,6 +27,12 @@ var (
 	//go:embed shaders/amb_light.frag
 	ambientLightFragmentShader string
 
+	//go:embed shaders/shadow.vert
+	shadowMappingVertexShader string
+
+	//go:embed shaders/shadow.frag
+	shadowMappingFragmentShader string
+
 	//go:embed shaders/skybox.vert
 	cubeSkyboxVertexShader string
 
@@ -55,6 +61,7 @@ var (
 func NewShaderCollection() graphics.ShaderCollection {
 	return graphics.ShaderCollection{
 		PBRShaderSet:        newPBRShaderSet,
+		ShadowMappingSet:    newShadowMappingSet,
 		DirectionalLightSet: newDirectionalLightShaderSet,
 		AmbientLightSet:     newAmbientLightShaderSet,
 		SkyboxSet:           newSkyboxShaderSet,
@@ -78,6 +85,19 @@ func newPBRShaderSet(definition graphics.PBRMaterialDefinition) graphics.ShaderS
 		fsBuilder.AddFeature("USES_ALPHA_TEST")
 	}
 	if definition.Armature {
+		vsBuilder.AddFeature("USES_BONES")
+		fsBuilder.AddFeature("USES_BONES")
+	}
+	return graphics.ShaderSet{
+		VertexShader:   vsBuilder.Build,
+		FragmentShader: fsBuilder.Build,
+	}
+}
+
+func newShadowMappingSet(cfg graphics.ShadowMappingShaderConfig) graphics.ShaderSet {
+	vsBuilder := internal.NewShaderSourceBuilder(shadowMappingVertexShader)
+	fsBuilder := internal.NewShaderSourceBuilder(shadowMappingFragmentShader)
+	if cfg.HasArmature {
 		vsBuilder.AddFeature("USES_BONES")
 		fsBuilder.AddFeature("USES_BONES")
 	}
