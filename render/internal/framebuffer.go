@@ -20,6 +20,9 @@ func NewFramebuffer(info render.FramebufferInfo) *Framebuffer {
 			activeDrawBuffers[i] = true
 		}
 	}
+	if len(drawBuffers) == 0 {
+		drawBuffers = append(drawBuffers, gl.NONE)
+	}
 
 	if depthStencilAttachment, ok := info.DepthStencilAttachment.(*Texture); ok {
 		gl.NamedFramebufferTexture(id, gl.DEPTH_STENCIL_ATTACHMENT, depthStencilAttachment.id, 0)
