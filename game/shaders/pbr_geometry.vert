@@ -18,8 +18,7 @@ layout (binding = 0, std140) uniform Camera
 #if defined(USES_BONES)
 layout (binding = 1, std140) uniform Model
 {
-	mat4 modelMatrixIn;
-	mat4 boneMatrixIn[255];
+	mat4 boneMatrixIn[256];
 };
 #else
 layout (binding = 1, std140) uniform Model
@@ -39,20 +38,20 @@ void main()
 	texCoordInOut = texCoordIn;
 #endif
 #if defined(USES_BONES)
-	mat4 modelMatrixA = modelMatrixIn * boneMatrixIn[jointsIn.x];
-	mat4 modelMatrixB = modelMatrixIn * boneMatrixIn[jointsIn.y];
-	mat4 modelMatrixC = modelMatrixIn * boneMatrixIn[jointsIn.z];
-	mat4 modelMatrixD = modelMatrixIn * boneMatrixIn[jointsIn.w];
+	mat4 modelMatrixA = boneMatrixIn[jointsIn.x];
+	mat4 modelMatrixB = boneMatrixIn[jointsIn.y];
+	mat4 modelMatrixC = boneMatrixIn[jointsIn.z];
+	mat4 modelMatrixD = boneMatrixIn[jointsIn.w];
 	vec4 worldPosition =
-		modelMatrixA * (weightsIn.x * coordIn) +
-		modelMatrixB * (weightsIn.y * coordIn) +
-		modelMatrixC * (weightsIn.z * coordIn) +
-		modelMatrixD * (weightsIn.w * coordIn);
+		modelMatrixA * (coordIn * weightsIn.x) +
+		modelMatrixB * (coordIn * weightsIn.y) +
+		modelMatrixC * (coordIn * weightsIn.z) +
+		modelMatrixD * (coordIn * weightsIn.w);
 	vec3 worldNormal =
-		inverse(transpose(mat3(modelMatrixA))) * (weightsIn.x * normalIn) +
-		inverse(transpose(mat3(modelMatrixB))) * (weightsIn.y * normalIn) +
-		inverse(transpose(mat3(modelMatrixC))) * (weightsIn.z * normalIn) +
-		inverse(transpose(mat3(modelMatrixD))) * (weightsIn.w * normalIn);
+		inverse(transpose(mat3(modelMatrixA))) * (normalIn * weightsIn.x) +
+		inverse(transpose(mat3(modelMatrixB))) * (normalIn * weightsIn.y) +
+		inverse(transpose(mat3(modelMatrixC))) * (normalIn * weightsIn.z) +
+		inverse(transpose(mat3(modelMatrixD))) * (normalIn * weightsIn.w);
 #else
 	mat4 modelMatrix = modelMatrixIn[gl_InstanceID];
 	vec4 worldPosition = modelMatrix * coordIn;
