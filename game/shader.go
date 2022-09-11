@@ -27,6 +27,12 @@ var (
 	//go:embed shaders/amb_light.frag
 	ambientLightFragmentShader string
 
+	//go:embed shaders/point_light.vert
+	pointLightVertexShader string
+
+	//go:embed shaders/point_light.frag
+	pointLightFragmentShader string
+
 	//go:embed shaders/shadow.vert
 	shadowMappingVertexShader string
 
@@ -60,37 +66,15 @@ var (
 
 func NewShaderCollection() graphics.ShaderCollection {
 	return graphics.ShaderCollection{
-		PBRShaderSet:        newPBRShaderSet,
 		ShadowMappingSet:    newShadowMappingSet,
+		PBRGeometrySet:      newPBRGeometrySet,
 		DirectionalLightSet: newDirectionalLightShaderSet,
 		AmbientLightSet:     newAmbientLightShaderSet,
+		PointLightSet:       newPointLightShaderSet,
 		SkyboxSet:           newSkyboxShaderSet,
 		SkycolorSet:         newSkycolorShaderSet,
 		ExposureSet:         newExposureShaderSet,
 		PostprocessingSet:   newPostprocessingShaderSet,
-	}
-}
-
-func newPBRShaderSet(definition graphics.PBRMaterialDefinition) graphics.ShaderSet {
-	vsBuilder := internal.NewShaderSourceBuilder(pbrGeometryVertexShader)
-	fsBuilder := internal.NewShaderSourceBuilder(pbrGeometryFragmentShader)
-	if definition.AlbedoTexture != nil {
-		vsBuilder.AddFeature("USES_ALBEDO_TEXTURE")
-		fsBuilder.AddFeature("USES_ALBEDO_TEXTURE")
-		vsBuilder.AddFeature("USES_TEX_COORD0")
-		fsBuilder.AddFeature("USES_TEX_COORD0")
-	}
-	if definition.AlphaTesting {
-		vsBuilder.AddFeature("USES_ALPHA_TEST")
-		fsBuilder.AddFeature("USES_ALPHA_TEST")
-	}
-	if definition.Armature {
-		vsBuilder.AddFeature("USES_BONES")
-		fsBuilder.AddFeature("USES_BONES")
-	}
-	return graphics.ShaderSet{
-		VertexShader:   vsBuilder.Build,
-		FragmentShader: fsBuilder.Build,
 	}
 }
 
@@ -102,8 +86,31 @@ func newShadowMappingSet(cfg graphics.ShadowMappingShaderConfig) graphics.Shader
 		fsBuilder.AddFeature("USES_BONES")
 	}
 	return graphics.ShaderSet{
-		VertexShader:   vsBuilder.Build,
-		FragmentShader: fsBuilder.Build,
+		VertexShader:   vsBuilder.Build(),
+		FragmentShader: fsBuilder.Build(),
+	}
+}
+
+func newPBRGeometrySet(cfg graphics.PBRGeometryShaderConfig) graphics.ShaderSet {
+	vsBuilder := internal.NewShaderSourceBuilder(pbrGeometryVertexShader)
+	fsBuilder := internal.NewShaderSourceBuilder(pbrGeometryFragmentShader)
+	if cfg.HasArmature {
+		vsBuilder.AddFeature("USES_BONES")
+		fsBuilder.AddFeature("USES_BONES")
+	}
+	if cfg.HasAlphaTesting {
+		vsBuilder.AddFeature("USES_ALPHA_TEST")
+		fsBuilder.AddFeature("USES_ALPHA_TEST")
+	}
+	if cfg.HasAlbedoTexture {
+		vsBuilder.AddFeature("USES_ALBEDO_TEXTURE")
+		fsBuilder.AddFeature("USES_ALBEDO_TEXTURE")
+		vsBuilder.AddFeature("USES_TEX_COORD0")
+		fsBuilder.AddFeature("USES_TEX_COORD0")
+	}
+	return graphics.ShaderSet{
+		VertexShader:   vsBuilder.Build(),
+		FragmentShader: fsBuilder.Build(),
 	}
 }
 
@@ -111,8 +118,8 @@ func newDirectionalLightShaderSet() graphics.ShaderSet {
 	vsBuilder := internal.NewShaderSourceBuilder(directionalLightVertexShader)
 	fsBuilder := internal.NewShaderSourceBuilder(directionalLightFragmentShader)
 	return graphics.ShaderSet{
-		VertexShader:   vsBuilder.Build,
-		FragmentShader: fsBuilder.Build,
+		VertexShader:   vsBuilder.Build(),
+		FragmentShader: fsBuilder.Build(),
 	}
 }
 
@@ -120,8 +127,17 @@ func newAmbientLightShaderSet() graphics.ShaderSet {
 	vsBuilder := internal.NewShaderSourceBuilder(ambientLightVertexShader)
 	fsBuilder := internal.NewShaderSourceBuilder(ambientLightFragmentShader)
 	return graphics.ShaderSet{
-		VertexShader:   vsBuilder.Build,
-		FragmentShader: fsBuilder.Build,
+		VertexShader:   vsBuilder.Build(),
+		FragmentShader: fsBuilder.Build(),
+	}
+}
+
+func newPointLightShaderSet() graphics.ShaderSet {
+	vsBuilder := internal.NewShaderSourceBuilder(pointLightVertexShader)
+	fsBuilder := internal.NewShaderSourceBuilder(pointLightFragmentShader)
+	return graphics.ShaderSet{
+		VertexShader:   vsBuilder.Build(),
+		FragmentShader: fsBuilder.Build(),
 	}
 }
 
@@ -129,8 +145,8 @@ func newSkyboxShaderSet() graphics.ShaderSet {
 	vsBuilder := internal.NewShaderSourceBuilder(cubeSkyboxVertexShader)
 	fsBuilder := internal.NewShaderSourceBuilder(cubeSkyboxFragmentShader)
 	return graphics.ShaderSet{
-		VertexShader:   vsBuilder.Build,
-		FragmentShader: fsBuilder.Build,
+		VertexShader:   vsBuilder.Build(),
+		FragmentShader: fsBuilder.Build(),
 	}
 }
 
@@ -138,8 +154,8 @@ func newSkycolorShaderSet() graphics.ShaderSet {
 	vsBuilder := internal.NewShaderSourceBuilder(colorSkyboxVertexShader)
 	fsBuilder := internal.NewShaderSourceBuilder(colorSkyboxFragmentShader)
 	return graphics.ShaderSet{
-		VertexShader:   vsBuilder.Build,
-		FragmentShader: fsBuilder.Build,
+		VertexShader:   vsBuilder.Build(),
+		FragmentShader: fsBuilder.Build(),
 	}
 }
 
@@ -147,24 +163,24 @@ func newExposureShaderSet() graphics.ShaderSet {
 	vsBuilder := internal.NewShaderSourceBuilder(exposureVertexShader)
 	fsBuilder := internal.NewShaderSourceBuilder(exposureFragmentShader)
 	return graphics.ShaderSet{
-		VertexShader:   vsBuilder.Build,
-		FragmentShader: fsBuilder.Build,
+		VertexShader:   vsBuilder.Build(),
+		FragmentShader: fsBuilder.Build(),
 	}
 }
 
-func newPostprocessingShaderSet(mapping graphics.ToneMapping) graphics.ShaderSet {
+func newPostprocessingShaderSet(cfg graphics.PostprocessingShaderConfig) graphics.ShaderSet {
 	vsBuilder := internal.NewShaderSourceBuilder(tonePostprocessingVertexShader)
 	fsBuilder := internal.NewShaderSourceBuilder(tonePostprocessingFragmentShader)
-	switch mapping {
+	switch cfg.ToneMapping {
 	case graphics.ReinhardToneMapping:
 		fsBuilder.AddFeature("MODE_REINHARD")
 	case graphics.ExponentialToneMapping:
 		fsBuilder.AddFeature("MODE_EXPONENTIAL")
 	default:
-		panic(fmt.Errorf("unknown tone mapping mode: %s", mapping))
+		panic(fmt.Errorf("unknown tone mapping mode: %s", cfg.ToneMapping))
 	}
 	return graphics.ShaderSet{
-		VertexShader:   vsBuilder.Build,
-		FragmentShader: fsBuilder.Build,
+		VertexShader:   vsBuilder.Build(),
+		FragmentShader: fsBuilder.Build(),
 	}
 }

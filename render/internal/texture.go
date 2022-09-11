@@ -49,8 +49,9 @@ func NewDepthTexture2D(info render.DepthTexture2DInfo) *Texture {
 		gl.TextureParameteri(id, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 		gl.TextureParameteri(id, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 	}
-	gl.TextureParameteri(id, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-	gl.TextureParameteri(id, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	gl.TextureParameteri(id, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TextureParameteri(id, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	gl.TextureParameteri(id, gl.TEXTURE_COMPARE_MODE, gl.COMPARE_REF_TO_TEXTURE)
 	gl.TextureStorage2D(id, 1, gl.DEPTH_COMPONENT32, int32(info.Width), int32(info.Height))
 	return &Texture{
 		id: id,
