@@ -25,6 +25,10 @@ func NewProgram(info render.ProgramInfo) *Program {
 	if err := program.link(); err != nil {
 		log.Error("Program link error: %v", err)
 	}
+	// NOTE: Texture bindings are to be done in GLSL through
+	// `layout(binding = 2) uniform ...`.
+	// NOTE: Buffer bindings are to be done in GLSL through
+	// `layout(binding = 2, std140) uniform ...`
 	return program
 }
 

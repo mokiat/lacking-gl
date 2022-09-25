@@ -20,6 +20,9 @@ func NewFramebuffer(info render.FramebufferInfo) *Framebuffer {
 			activeDrawBuffers[i] = true
 		}
 	}
+	if len(drawBuffers) == 0 {
+		drawBuffers = append(drawBuffers, gl.NONE)
+	}
 
 	if depthStencilAttachment, ok := info.DepthStencilAttachment.(*Texture); ok {
 		gl.NamedFramebufferTexture(id, gl.DEPTH_STENCIL_ATTACHMENT, depthStencilAttachment.id, 0)
@@ -60,4 +63,37 @@ func (f *Framebuffer) Release() {
 	gl.DeleteFramebuffers(1, &f.id)
 	f.id = 0
 	f.activeDrawBuffers = [4]bool{}
+}
+
+func DetermineContentFormat(framebuffer render.Framebuffer) render.DataFormat {
+	fb := framebuffer.(*Framebuffer)
+	gl.BindFramebuffer(gl.FRAMEBUFFER, fb.id)
+	defer func() {
+		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	}()
+	var glFormat int32
+	gl.GetNamedFramebufferParameteriv(
+		fb.id,
+		gl.IMPLEMENTATION_COLOR_READ_FORMAT,
+		&glFormat,
+	)
+	if glFormat != gl.RGBA {
+		return render.DataFormatUnsupported
+	}
+	var glType int32
+	gl.GetNamedFramebufferParameteriv(
+		fb.id,
+		gl.IMPLEMENTATION_COLOR_READ_TYPE,
+		&glType,
+	)
+	switch glType {
+	case gl.UNSIGNED_BYTE:
+		return render.DataFormatRGBA8
+	case gl.HALF_FLOAT:
+		return render.DataFormatRGBA16F
+	case gl.FLOAT:
+		return render.DataFormatRGBA32F
+	default:
+		return render.DataFormatUnsupported
+	}
 }

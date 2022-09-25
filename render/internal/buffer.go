@@ -17,6 +17,10 @@ func NewPixelTransferBuffer(info render.BufferInfo) render.Buffer {
 	return newBuffer(info)
 }
 
+func NewUniformBuffer(info render.BufferInfo) render.Buffer {
+	return newBuffer(info)
+}
+
 func newBuffer(info render.BufferInfo) *Buffer {
 	var id uint32
 	gl.CreateBuffers(1, &id)
@@ -53,7 +57,7 @@ func (b *Buffer) Release() {
 func glBufferFlags(dynamic bool) uint32 {
 	var flags uint32
 	if dynamic {
-		flags |= gl.DYNAMIC_STORAGE_BIT
+		flags |= gl.DYNAMIC_STORAGE_BIT | gl.CLIENT_STORAGE_BIT
 	}
 	return flags
 }

@@ -138,18 +138,22 @@ func (l *loop) GamepadState(index int) (app.GamepadState, bool) {
 
 	state := joystick.GetGamepadState()
 	return app.GamepadState{
-		LeftStickX:     state.Axes[glfw.AxisLeftX],
-		LeftStickY:     -state.Axes[glfw.AxisLeftY],
-		RightStickX:    state.Axes[glfw.AxisRightX],
-		RightStickY:    -state.Axes[glfw.AxisRightY],
-		LeftTrigger:    (state.Axes[glfw.AxisLeftTrigger] + 1.0) / 2.0,
-		RightTrigger:   (state.Axes[glfw.AxisRightTrigger] + 1.0) / 2.0,
-		LeftBumper:     state.Buttons[glfw.ButtonLeftBumper] == glfw.Press,
-		RightBumper:    state.Buttons[glfw.ButtonRightBumper] == glfw.Press,
-		SquareButton:   state.Buttons[glfw.ButtonSquare] == glfw.Press,
-		CircleButton:   state.Buttons[glfw.ButtonCircle] == glfw.Press,
-		TriangleButton: state.Buttons[glfw.ButtonTriangle] == glfw.Press,
-		CrossButton:    state.Buttons[glfw.ButtonCross] == glfw.Press,
+		LeftStickX:      float64(state.Axes[glfw.AxisLeftX]),
+		LeftStickY:      -float64(state.Axes[glfw.AxisLeftY]),
+		RightStickX:     float64(state.Axes[glfw.AxisRightX]),
+		RightStickY:     -float64(state.Axes[glfw.AxisRightY]),
+		LeftTrigger:     float64(state.Axes[glfw.AxisLeftTrigger]+1.0) / 2.0,
+		RightTrigger:    float64(state.Axes[glfw.AxisRightTrigger]+1.0) / 2.0,
+		LeftBumper:      state.Buttons[glfw.ButtonLeftBumper] == glfw.Press,
+		RightBumper:     state.Buttons[glfw.ButtonRightBumper] == glfw.Press,
+		SquareButton:    state.Buttons[glfw.ButtonSquare] == glfw.Press,
+		CircleButton:    state.Buttons[glfw.ButtonCircle] == glfw.Press,
+		TriangleButton:  state.Buttons[glfw.ButtonTriangle] == glfw.Press,
+		CrossButton:     state.Buttons[glfw.ButtonCross] == glfw.Press,
+		DpadUpButton:    state.Buttons[glfw.ButtonDpadUp] == glfw.Press,
+		DpadDownButton:  state.Buttons[glfw.ButtonDpadDown] == glfw.Press,
+		DpadLeftButton:  state.Buttons[glfw.ButtonDpadLeft] == glfw.Press,
+		DpadRightButton: state.Buttons[glfw.ButtonDpadRight] == glfw.Press,
 	}, true
 }
 

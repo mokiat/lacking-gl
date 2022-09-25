@@ -52,6 +52,7 @@ func NewRenderer() *Renderer {
 type Renderer struct {
 	framebuffer           *Framebuffer
 	invalidateAttachments []uint32
+	program               uint32
 	topology              uint32
 	indexType             uint32
 
@@ -208,6 +209,7 @@ func (r *Renderer) EndRenderPass() {
 }
 
 func (r *Renderer) Invalidate() {
+	r.program = 0
 	r.isDirty = true
 	r.isInvalidated = true
 }
@@ -270,6 +272,22 @@ func (r *Renderer) UniformMatrix4f(location render.UniformLocation, values [16]f
 	r.executeCommandUniformMatrix4f(CommandUniformMatrix4f{
 		Location: location.(int32),
 		Values:   values,
+	})
+}
+
+func (r *Renderer) UniformBufferUnit(index int, buffer render.Buffer) {
+	r.executeCommandUniformBufferUnit(CommandUniformBufferUnit{
+		Index:    uint32(index),
+		BufferID: buffer.(*Buffer).id,
+	})
+}
+
+func (r *Renderer) UniformBufferUnitRange(index int, buffer render.Buffer, offset, size int) {
+	r.executeCommandUniformBufferUnitRange(CommandUniformBufferUnitRange{
+		Index:    uint32(index),
+		BufferID: buffer.(*Buffer).id,
+		Offset:   uint32(offset),
+		Size:     uint32(size),
 	})
 }
 
@@ -353,6 +371,12 @@ func (r *Renderer) SubmitQueue(queue *CommandQueue) {
 		case CommandKindUniformMatrix4f:
 			command := PopCommand[CommandUniformMatrix4f](queue)
 			r.executeCommandUniformMatrix4f(command)
+		case CommandKindUniformBufferUnit:
+			command := PopCommand[CommandUniformBufferUnit](queue)
+			r.executeCommandUniformBufferUnit(command)
+		case CommandKindUniformBufferUnitRange:
+			command := PopCommand[CommandUniformBufferUnitRange](queue)
+			r.executeCommandUniformBufferUnitRange(command)
 		case CommandKindTextureUnit:
 			command := PopCommand[CommandTextureUnit](queue)
 			r.executeCommandTextureUnit(command)
@@ -365,6 +389,10 @@ func (r *Renderer) SubmitQueue(queue *CommandQueue) {
 		case CommandKindCopyContentToBuffer:
 			command := PopCommand[CommandCopyContentToBuffer](queue)
 			r.executeCommandCopyContentToBuffer(command)
+		case CommandKindUpdateBufferData:
+			command := PopCommand[CommandUpdateBufferData](queue)
+			data := PopData(queue, command.Count)
+			r.executeCommandUpdateBufferData(command, data)
 		default:
 			panic(fmt.Errorf("unknown command kind: %v", header.Kind))
 		}
@@ -373,7 +401,10 @@ func (r *Renderer) SubmitQueue(queue *CommandQueue) {
 }
 
 func (r *Renderer) executeCommandBindPipeline(command CommandBindPipeline) {
-	gl.UseProgram(command.ProgramID)
+	if r.program != command.ProgramID {
+		r.program = command.ProgramID
+		gl.UseProgram(command.ProgramID)
+	}
 	r.executeCommandTopology(command.Topology)
 	r.executeCommandCullTest(command.CullTest)
 	r.executeCommandFrontFace(command.FrontFace)
@@ -549,6 +580,24 @@ func (r *Renderer) executeCommandUniformMatrix4f(command CommandUniformMatrix4f)
 	)
 }
 
+func (r *Renderer) executeCommandUniformBufferUnit(command CommandUniformBufferUnit) {
+	gl.BindBufferBase(
+		gl.UNIFORM_BUFFER,
+		command.Index,
+		command.BufferID,
+	)
+}
+
+func (r *Renderer) executeCommandUniformBufferUnitRange(command CommandUniformBufferUnitRange) {
+	gl.BindBufferRange(
+		gl.UNIFORM_BUFFER,
+		command.Index,
+		command.BufferID,
+		int(command.Offset),
+		int(command.Size),
+	)
+}
+
 func (r *Renderer) executeCommandTextureUnit(command CommandTextureUnit) {
 	gl.BindTextureUnit(
 		command.Index,
@@ -595,6 +644,10 @@ func (r *Renderer) executeCommandCopyContentToBuffer(command CommandCopyContentT
 		gl.PIXEL_PACK_BUFFER,
 		0,
 	)
+}
+
+func (r *Renderer) executeCommandUpdateBufferData(command CommandUpdateBufferData, data []byte) {
+	gl.NamedBufferSubData(command.BufferID, int(command.Offset), len(data), gl.Ptr(data))
 }
 
 func (r *Renderer) validateState() {
