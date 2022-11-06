@@ -30,6 +30,7 @@ type Config struct {
 	maxHeight     *int
 	swapInterval  int
 	maximized     bool
+	fullscreen    bool
 	cursorVisible bool
 	cursor        *app.CursorDefinition
 	icon          string
@@ -101,6 +102,18 @@ func (c *Config) SetMaximized(maximized bool) {
 // maximized state.
 func (c *Config) Maximized() bool {
 	return c.maximized
+}
+
+// SetFullscreen specifies whether the window should be created in
+// a fullscreen mode.
+func (c *Config) SetFullscreen(fullscreen bool) {
+	c.fullscreen = fullscreen
+}
+
+// Fullscreen returns whether the window will be created in fullscreen
+// mode.
+func (c *Config) Fullscreen() bool {
+	return c.fullscreen
 }
 
 // SetCursorVisible specifies whether the cursor should be
