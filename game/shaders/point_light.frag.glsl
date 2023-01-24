@@ -110,9 +110,9 @@ void main()
 	vec3 reflectedColor = mix(vec3(0.02), baseColor, metalness);
 
 	vec3 lightDirection = lightMatrixIn[3].xyz - worldPosition;
-	float lightDistanceSqr = (0.001 + dot(lightDirection, lightDirection));
+	float lightDistanceSqr = dot(lightDirection, lightDirection);
 
-	float attenuation = max(min(1.0 - sqrt(lightDistanceSqr) / lightRangeIn, 1.0), 0.0) / lightDistanceSqr;
+	float attenuation = max(min(1.0 - sqrt(lightDistanceSqr) / lightRangeIn, 1.0), 0.0) / (1.0 + lightDistanceSqr);
 
 	vec3 hdr = calculateDirectionalHDR(directionalSetup(
 		roughness,
