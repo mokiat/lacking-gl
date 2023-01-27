@@ -65,6 +65,7 @@ type Renderer struct {
 func (r *Renderer) BeginRenderPass(info render.RenderPassInfo) {
 	r.validateState()
 
+	gl.Enable(gl.PRIMITIVE_RESTART_FIXED_INDEX)
 	gl.Enable(gl.CLIP_DISTANCE0)
 	gl.Enable(gl.CLIP_DISTANCE1)
 	gl.Enable(gl.CLIP_DISTANCE2)
@@ -195,16 +196,11 @@ func (r *Renderer) EndRenderPass() {
 	if len(r.invalidateAttachments) > 0 {
 		gl.InvalidateNamedFramebufferData(r.framebuffer.id, 1, &r.invalidateAttachments[0])
 	}
-
-	// FIXME
 	gl.Disable(gl.CLIP_DISTANCE0)
 	gl.Disable(gl.CLIP_DISTANCE1)
 	gl.Disable(gl.CLIP_DISTANCE2)
 	gl.Disable(gl.CLIP_DISTANCE3)
-	// gl.Disable(gl.BLEND)
-	// gl.ColorMask(true, true, true, true)
-	// gl.DepthMask(true)
-
+	gl.Disable(gl.PRIMITIVE_RESTART_FIXED_INDEX)
 	r.framebuffer = DefaultFramebuffer
 }
 
