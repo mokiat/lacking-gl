@@ -1,3 +1,5 @@
+/*template "version.glsl"*/
+
 layout(location = 0) in vec3 coordIn;
 
 noperspective out vec2 texCoordInOut;

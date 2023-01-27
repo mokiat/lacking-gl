@@ -1,3 +1,5 @@
+/*template "version.glsl"*/
+
 layout(location = 0) out vec4 fbColor0Out;
 
 layout(binding = 0) uniform sampler2D fbColor0TextureIn;
@@ -5,19 +7,9 @@ layout(binding = 1) uniform sampler2D fbColor1TextureIn;
 layout(binding = 3) uniform sampler2D fbDepthTextureIn;
 layout(binding = 4) uniform sampler2DShadow fbShadowTextureIn;
 
-layout (binding = 0, std140) uniform Camera
-{
-	mat4 projectionMatrixIn;
-	mat4 viewMatrixIn;
-	mat4 cameraMatrixIn;
-};
+/*template "ubo_camera.glsl"*/
 
-layout (binding = 3, std140) uniform Light
-{
-	mat4 lightProjectionMatrixIn;
-	mat4 lightViewMatrixIn;
-	mat4 lightMatrixIn;
-};
+/*template "ubo_light.glsl"*/
 
 uniform vec3 lightDirectionIn;
 uniform vec3 lightIntensityIn = vec3(1.0, 1.0, 1.0);
@@ -33,7 +25,7 @@ struct fresnelInput {
 };
 
 vec3 calculateFresnel(fresnelInput i) {
-	float halfLightDot = clamp(dot(i.halfDirection, i.lightDirection), 0.0, 1.0);
+	float halfLightDot = clamp(abs(dot(i.halfDirection, i.lightDirection)), 0.0, 1.0);
 	return i.reflectanceF0 + (1.0 - i.reflectanceF0) * pow(1.0 - halfLightDot, 5);
 }
 
@@ -86,7 +78,7 @@ vec3 calculateDirectionalHDR(directionalSetup s) {
 	));
 	vec3 reflectedHDR = fresnel * distributionFactor * geometryFactor;
 	vec3 refractedHDR = (vec3(1.0) - fresnel) * s.refractedColor / pi;
-	return (reflectedHDR + refractedHDR) * s.lightIntensity * clamp(dot(s.normal, s.lightDirection), 0.0, 1.0);
+	return (reflectedHDR + refractedHDR) * s.lightIntensity * clamp(abs(dot(s.normal, s.lightDirection)), 0.0, 1.0);
 }
 
 void main()
@@ -126,7 +118,7 @@ void main()
 	));
 
 	vec4 lightPosition = lightProjectionMatrixIn * lightViewMatrixIn * vec4(worldPosition, 1.0);
-	float directness = clamp(dot(normal, normalize(lightDirectionIn)), 0.0, 1.0);
+	float directness = clamp(abs(dot(normal, normalize(lightDirectionIn))), 0.0, 1.0);
 	lightPosition.xyz = lightPosition.xyz * 0.5 + 0.5;
 	lightPosition.z /= lightPosition.w;
 	lightPosition.z -= 0.0005;

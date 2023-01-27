@@ -1,3 +1,5 @@
+/*template "version.glsl"*/
+
 layout(location = 0) out vec4 fbColor0Out;
 
 layout(binding = 0) uniform sampler2D fbColor0TextureIn;
@@ -6,12 +8,7 @@ layout(binding = 3) uniform sampler2D fbDepthTextureIn;
 layout(binding = 4) uniform samplerCube reflectionTextureIn;
 layout(binding = 5) uniform samplerCube refractionTextureIn;
 
-layout (binding = 0, std140) uniform Camera
-{
-	mat4 projectionMatrixIn;
-	mat4 viewMatrixIn;
-	mat4 cameraMatrixIn;
-};
+/*template "ubo_camera.glsl"*/
 
 noperspective in vec2 texCoordInOut;
 

@@ -1,26 +1,17 @@
+/*template "version.glsl"*/
+
 layout(location = 0) out vec4 fbColor0Out;
 
 layout(binding = 0) uniform sampler2D fbColor0TextureIn;
 layout(binding = 1) uniform sampler2D fbColor1TextureIn;
 layout(binding = 3) uniform sampler2D fbDepthTextureIn;
 
-layout (binding = 0, std140) uniform Camera
-{
-	mat4 projectionMatrixIn;
-	mat4 viewMatrixIn;
-	mat4 cameraMatrixIn;
-};
+/*template "ubo_camera.glsl"*/
 
-layout (binding = 3, std140) uniform Light
-{
-	mat4 lightProjectionMatrixIn;
-	mat4 lightViewMatrixIn;
-	mat4 lightMatrixIn;
-};
+/*template "ubo_light.glsl"*/
 
 uniform vec3 lightIntensityIn = vec3(1.0, 1.0, 1.0);
-
-noperspective in vec2 texCoordInOut;
+uniform float lightRangeIn = 4.0;
 
 const float pi = 3.141592;
 
@@ -89,10 +80,15 @@ vec3 calculateDirectionalHDR(directionalSetup s) {
 
 void main()
 {
+	vec2 screenCoord = vec2(
+		gl_FragCoord.x / viewportIn.z,
+		gl_FragCoord.y / viewportIn.w
+	);
+
 	vec3 ndcPosition = vec3(
-		(texCoordInOut.x - 0.5) * 2.0,
-		(texCoordInOut.y - 0.5) * 2.0,
-		texture(fbDepthTextureIn, texCoordInOut).x * 2.0 - 1.0
+		(screenCoord.x - 0.5) * 2.0,
+		(screenCoord.y - 0.5) * 2.0,
+		texture(fbDepthTextureIn, screenCoord).x * 2.0 - 1.0
 	);
 	vec3 clipPosition = vec3(
 		ndcPosition.x / projectionMatrixIn[0][0],
@@ -103,8 +99,8 @@ void main()
 	vec3 worldPosition = (cameraMatrixIn * vec4(viewPosition, 1.0)).xyz;
 	vec3 cameraPosition = cameraMatrixIn[3].xyz;
 
-	vec4 albedoMetalness = texture(fbColor0TextureIn, texCoordInOut);
-	vec4 normalRoughness = texture(fbColor1TextureIn, texCoordInOut);
+	vec4 albedoMetalness = texture(fbColor0TextureIn, screenCoord);
+	vec4 normalRoughness = texture(fbColor1TextureIn, screenCoord);
 	vec3 baseColor = albedoMetalness.xyz;
 	vec3 normal = normalize(normalRoughness.xyz);
 	float metalness = albedoMetalness.w;
@@ -113,17 +109,17 @@ void main()
 	vec3 refractedColor = baseColor * (1.0 - metalness);
 	vec3 reflectedColor = mix(vec3(0.02), baseColor, metalness);
 
-	vec3 lightDiration = lightMatrixIn[3].xyz - worldPosition;
+	vec3 lightDirection = lightMatrixIn[3].xyz - worldPosition;
+	float lightDistanceSqr = dot(lightDirection, lightDirection);
 
-	// float attenuation = 1.0; // TODO: 1.0/dot(lightDiration, lightDiration)
-	float attenuation = 1.0 / (1.0 + dot(lightDiration, lightDiration));
+	float attenuation = max(min(1.0 - sqrt(lightDistanceSqr) / lightRangeIn, 1.0), 0.0) / (1.0 + lightDistanceSqr);
 
 	vec3 hdr = calculateDirectionalHDR(directionalSetup(
 		roughness,
 		reflectedColor,
 		refractedColor,
 		normalize(cameraPosition - worldPosition),
-		normalize(lightDiration),
+		normalize(lightDirection),
 		normal,
 		lightIntensityIn
 	));
