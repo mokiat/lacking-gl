@@ -12,6 +12,8 @@ layout(binding = 3) uniform sampler2D fbDepthTextureIn;
 
 uniform vec3 lightIntensityIn = vec3(1.0, 1.0, 1.0);
 uniform float lightRangeIn = 4.0;
+uniform float lightOuterCosIn = 0.3;
+uniform float lightInnerCosIn = 0.3;
 
 const float pi = 3.141592;
 
@@ -114,6 +116,9 @@ void main()
 
 	float attenuation = max(min(1.0 - sqrt(lightDistanceSqr) / lightRangeIn, 1.0), 0.0) / (1.0 + lightDistanceSqr);
 
+	float coneSoftness = (0.5 +  0.5 * step(lightInnerCosIn, dot(normalize(lightDirection), normalize(lightMatrixIn[1].xyz))));
+	float coneAttentuation = step(lightOuterCosIn, dot(normalize(lightDirection), normalize(lightMatrixIn[1].xyz)));
+
 	vec3 hdr = calculateDirectionalHDR(directionalSetup(
 		roughness,
 		reflectedColor,
@@ -123,5 +128,5 @@ void main()
 		normal,
 		lightIntensityIn
 	));
-	fbColor0Out = vec4(hdr * attenuation, 1.0);
+	fbColor0Out = vec4(hdr * attenuation * coneAttentuation * coneSoftness, 1.0);
 }
