@@ -13,7 +13,7 @@ layout(binding = 3) uniform sampler2D fbDepthTextureIn;
 uniform vec3 lightIntensityIn = vec3(1.0, 1.0, 1.0);
 uniform float lightRangeIn = 4.0;
 
-const float pi = 3.141592;
+/*template "math.glsl"*/
 
 struct fresnelInput {
 	vec3 reflectanceF0;
@@ -78,25 +78,14 @@ vec3 calculateDirectionalHDR(directionalSetup s) {
 	return (reflectedHDR + refractedHDR) * s.lightIntensity * clamp(dot(s.normal, s.lightDirection), 0.0, 1.0);
 }
 
+/*template "lighting.glsl"*/
+
 void main()
 {
-	vec2 screenCoord = vec2(
-		gl_FragCoord.x / viewportIn.z,
-		gl_FragCoord.y / viewportIn.w
-	);
-
-	vec3 ndcPosition = vec3(
-		(screenCoord.x - 0.5) * 2.0,
-		(screenCoord.y - 0.5) * 2.0,
-		texture(fbDepthTextureIn, screenCoord).x * 2.0 - 1.0
-	);
-	vec3 clipPosition = vec3(
-		ndcPosition.x / projectionMatrixIn[0][0],
-		ndcPosition.y / projectionMatrixIn[1][1],
-		-1.0
-	);
-	vec3 viewPosition = clipPosition * projectionMatrixIn[3][2] / (projectionMatrixIn[2][2] + ndcPosition.z);
-	vec3 worldPosition = (cameraMatrixIn * vec4(viewPosition, 1.0)).xyz;
+	vec2 screenCoord = getScreenUVCoords(viewportIn);
+	vec3 ndcPosition = getScreenNDC(screenCoord, fbDepthTextureIn);
+	vec3 viewPosition = getViewCoords(ndcPosition, projectionMatrixIn);
+	vec3 worldPosition = getWorldCoords(viewPosition, cameraMatrixIn);
 	vec3 cameraPosition = cameraMatrixIn[3].xyz;
 
 	vec4 albedoMetalness = texture(fbColor0TextureIn, screenCoord);
@@ -110,9 +99,8 @@ void main()
 	vec3 reflectedColor = mix(vec3(0.02), baseColor, metalness);
 
 	vec3 lightDirection = lightMatrixIn[3].xyz - worldPosition;
-	float lightDistanceSqr = dot(lightDirection, lightDirection);
-
-	float attenuation = max(min(1.0 - sqrt(lightDistanceSqr) / lightRangeIn, 1.0), 0.0) / (1.0 + lightDistanceSqr);
+	float lightDistance = length(lightDirection);
+	float distAttenuation = getCappedDistanceAttenuation(lightDistance, lightRangeIn);
 
 	vec3 hdr = calculateDirectionalHDR(directionalSetup(
 		roughness,
@@ -123,5 +111,5 @@ void main()
 		normal,
 		lightIntensityIn
 	));
-	fbColor0Out = vec4(hdr * attenuation, 1.0);
+	fbColor0Out = vec4(hdr * distAttenuation, 1.0);
 }
