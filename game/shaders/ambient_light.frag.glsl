@@ -10,9 +10,7 @@ layout(binding = 5) uniform samplerCube refractionTextureIn;
 
 /*template "ubo_camera.glsl"*/
 
-noperspective in vec2 texCoordInOut;
-
-const float pi = 3.141592;
+/*template "math.glsl"*/
 
 struct ambientFresnelInput {
 	vec3 reflectanceF0;
@@ -70,24 +68,18 @@ vec3 calculateAmbientHDR(ambientSetup s) {
 	return (reflectedHDR + refractedHDR);
 }
 
+/*template "lighting.glsl"*/
+
 void main()
 {
-	vec3 ndcPosition = vec3(
-		(texCoordInOut.x - 0.5) * 2.0,
-		(texCoordInOut.y - 0.5) * 2.0,
-		texture(fbDepthTextureIn, texCoordInOut).x * 2.0 - 1.0
-	);
-	vec3 clipPosition = vec3(
-		ndcPosition.x / projectionMatrixIn[0][0],
-		ndcPosition.y / projectionMatrixIn[1][1],
-		-1.0
-	);
-	vec3 viewPosition = clipPosition * projectionMatrixIn[3][2] / (projectionMatrixIn[2][2] + ndcPosition.z);
-	vec3 worldPosition = (cameraMatrixIn * vec4(viewPosition, 1.0)).xyz;
+	vec2 screenCoord = getScreenUVCoords(viewportIn);
+	vec3 ndcPosition = getScreenNDC(screenCoord, fbDepthTextureIn);
+	vec3 viewPosition = getViewCoords(ndcPosition, projectionMatrixIn);
+	vec3 worldPosition = getWorldCoords(viewPosition, cameraMatrixIn);
 	vec3 cameraPosition = cameraMatrixIn[3].xyz;
 
-	vec4 albedoMetalness = texture(fbColor0TextureIn, texCoordInOut);
-	vec4 normalRoughness = texture(fbColor1TextureIn, texCoordInOut);
+	vec4 albedoMetalness = texture(fbColor0TextureIn, screenCoord);
+	vec4 normalRoughness = texture(fbColor1TextureIn, screenCoord);
 	vec3 baseColor = albedoMetalness.xyz;
 	vec3 normal = normalize(normalRoughness.xyz);
 	float metalness = albedoMetalness.w;
