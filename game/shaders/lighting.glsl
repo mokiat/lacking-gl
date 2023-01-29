@@ -43,8 +43,9 @@ float getCappedDistanceAttenuation(float dist, float maxDist)
 
 // getConeAttenuation calculates the attenuation for a cone-shaped light
 // source depending on the light direction.
-float getConeAttenuation(float angle, float outerAngle, float innerAngle) {
+float getConeAttenuation(float angle, float outerAngle, float innerAngle)
+{
   float hardAttenuation = 1.0 - step(outerAngle, angle);
-  float softAttenuation = clamp((outerAngle - angle) / (outerAngle - innerAngle + 0.01), 0.0, 1.0);
-  return hardAttenuation * softAttenuation;
+  float softAttenuation = clamp((outerAngle - angle) / (outerAngle - innerAngle + 0.001), 0.0, 1.0);
+  return hardAttenuation * (softAttenuation * softAttenuation);
 }
