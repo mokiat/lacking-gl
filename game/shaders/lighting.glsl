@@ -49,3 +49,68 @@ float getConeAttenuation(float angle, float outerAngle, float innerAngle)
   float softAttenuation = clamp((outerAngle - angle) / (outerAngle - innerAngle + 0.001), 0.0, 1.0);
   return hardAttenuation * (softAttenuation * softAttenuation);
 }
+
+// TODO: Improve the following function
+
+struct fresnelInput {
+	vec3 reflectanceF0;
+	vec3 halfDirection;
+	vec3 lightDirection;
+};
+
+vec3 calculateFresnel(fresnelInput i) {
+	float halfLightDot = clamp(abs(dot(i.halfDirection, i.lightDirection)), 0.0, 1.0);
+	return i.reflectanceF0 + (1.0 - i.reflectanceF0) * pow(1.0 - halfLightDot, 5);
+}
+
+struct distributionInput {
+	float roughness;
+	vec3 normal;
+	vec3 halfDirection;
+};
+
+float calculateDistribution(distributionInput i) {
+	float sqrRough = i.roughness * i.roughness;
+	float halfNormDot = dot(i.normal, i.halfDirection);
+	float denom = halfNormDot * halfNormDot * (sqrRough - 1.0) + 1.0;
+	return sqrRough / (pi * denom * denom);
+}
+
+struct geometryInput {
+	float roughness;
+};
+
+float calculateGeometry(geometryInput i) {
+	// TODO: Use better model
+	return 1.0 / 4.0;
+}
+
+struct directionalSetup {
+	float roughness;
+	vec3 reflectedColor;
+	vec3 refractedColor;
+	vec3 viewDirection;
+	vec3 lightDirection;
+	vec3 normal;
+	vec3 lightIntensity;
+};
+
+vec3 calculateDirectionalHDR(directionalSetup s) {
+	vec3 halfDirection = normalize(s.lightDirection + s.viewDirection);
+	vec3 fresnel = calculateFresnel(fresnelInput(
+		s.reflectedColor,
+		halfDirection,
+		s.lightDirection
+	));
+	float distributionFactor = calculateDistribution(distributionInput(
+		s.roughness,
+		s.normal,
+		halfDirection
+	));
+	float geometryFactor = calculateGeometry(geometryInput(
+		s.roughness
+	));
+	vec3 reflectedHDR = fresnel * distributionFactor * geometryFactor;
+	vec3 refractedHDR = (vec3(1.0) - fresnel) * s.refractedColor / pi;
+	return (reflectedHDR + refractedHDR) * s.lightIntensity * clamp(dot(s.normal, s.lightDirection), 0.0, 1.0);
+}

@@ -12,6 +12,8 @@ layout(binding = 5) uniform samplerCube refractionTextureIn;
 
 /*template "math.glsl"*/
 
+/*template "lighting.glsl"*/
+
 struct ambientFresnelInput {
 	vec3 reflectanceF0;
 	vec3 normal;
@@ -22,15 +24,6 @@ struct ambientFresnelInput {
 vec3 calculateAmbientFresnel(ambientFresnelInput i) {
 	float normViewDot = clamp(dot(i.normal, i.viewDirection), 0.0, 1.0);
 	return i.reflectanceF0 + (max(vec3(1.0 - i.roughness), i.reflectanceF0) - i.reflectanceF0) * pow(1.0 - normViewDot, 5);
-}
-
-struct geometryInput {
-	float roughness;
-};
-
-float calculateGeometry(geometryInput i) {
-	// TODO: Use better model
-	return 1.0 / 4.0;
 }
 
 struct ambientSetup {
@@ -67,8 +60,6 @@ vec3 calculateAmbientHDR(ambientSetup s) {
 
 	return (reflectedHDR + refractedHDR);
 }
-
-/*template "lighting.glsl"*/
 
 void main()
 {
