@@ -11,7 +11,6 @@ layout(binding = 4) uniform sampler2DShadow fbShadowTextureIn;
 
 /*template "ubo_light.glsl"*/
 
-uniform vec3 lightDirectionIn = vec3(1.0, 0.0, 0.0);
 uniform vec3 lightIntensityIn = vec3(1.0, 1.0, 1.0);
 
 /*template "math.glsl"*/
@@ -99,18 +98,20 @@ void main()
 	vec3 refractedColor = baseColor * (1.0 - metalness);
 	vec3 reflectedColor = mix(vec3(0.02), baseColor, metalness);
 
+	vec3 lightDirection = normalize(lightMatrixIn[3].xyz);
+
 	vec3 hdr = calculateDirectionalHDR(directionalSetup(
 		roughness,
 		reflectedColor,
 		refractedColor,
 		normalize(cameraPosition - worldPosition),
-		normalize(lightDirectionIn),
+		lightDirection,
 		normal,
 		lightIntensityIn
 	));
 
 	vec4 lightPosition = lightProjectionMatrixIn * lightViewMatrixIn * vec4(worldPosition, 1.0);
-	float directness = clamp(abs(dot(normal, normalize(lightDirectionIn))), 0.0, 1.0);
+	float directness = clamp(abs(dot(normal, lightDirection)), 0.0, 1.0);
 	lightPosition.xyz = lightPosition.xyz * 0.5 + 0.5;
 	lightPosition.z /= lightPosition.w;
 	lightPosition.z -= 0.0005;
