@@ -114,3 +114,49 @@ vec3 calculateDirectionalHDR(directionalSetup s) {
 	vec3 refractedHDR = (vec3(1.0) - fresnel) * s.refractedColor / pi;
 	return (reflectedHDR + refractedHDR) * s.lightIntensity * clamp(dot(s.normal, s.lightDirection), 0.0, 1.0);
 }
+
+struct ShadowSetup
+{
+	mat4 lightProjectionMatrix;
+	mat4 lightViewMatrix;
+	mat4 lightMatrix;
+	vec3 worldPosition;
+	vec3 normal;
+};
+
+float shadowAttenuation(sampler2DShadow shadowTex, ShadowSetup s)
+{
+	vec2 scale = vec2(1.0) / vec2(textureSize(shadowTex, 0));
+
+	float w = 64.0; // TODO: From projection matrix
+	float texelSize = w * max(scale.x, scale.y);
+	float bias = texelSize * 2.0;
+
+	vec3 pointPosition = s.worldPosition + s.normal * bias;
+	vec4 shadowClipPosition = s.lightProjectionMatrix * (s.lightViewMatrix * vec4(pointPosition, 1.0));
+	vec3 shadowNDCPosition = shadowClipPosition.xyz / shadowClipPosition.w;
+	vec3 shadowUVPosition = shadowNDCPosition * 0.5 + vec3(0.5);
+
+	const vec2[] shifts = {
+		vec2(0.00, 0.00),
+		vec2(1.00, 0.00),
+		vec2(0.71, 0.71),
+		vec2(0.00, 1.00),
+		vec2(-0.71, 0.71),
+		vec2(-1.00, 0.00),
+		vec2(-0.71, -0.71),
+		vec2(-0.00, -1.00),
+		vec2(0.71, -0.71),
+	};
+
+	float smoothness = 0.0;
+	for (int i = 0; i < 9; i++) {
+		vec3 offset = vec3(1.0 * shifts[i] / 4096, 0.0);
+		smoothness += texture(shadowTex, shadowUVPosition.xyz + offset);
+	}
+	smoothness /= 9;
+
+	float amount = texture(shadowTex, shadowUVPosition.xyz);
+	amount *= smoothness;
+	return amount;
+}

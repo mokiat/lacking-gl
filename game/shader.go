@@ -128,9 +128,13 @@ func newPBRGeometrySet(cfg graphics.PBRGeometryShaderConfig) graphics.ShaderSet 
 }
 
 func newDirectionalLightShaderSet() graphics.ShaderSet {
+	var settings struct {
+		UseShadowMapping bool
+	}
+	settings.UseShadowMapping = true // TODO
 	return graphics.ShaderSet{
-		VertexShader:   runTemplate(tmplDirectionalLightVertexShader, struct{}{}),
-		FragmentShader: runTemplate(tmplDirectionalLightFragmentShader, struct{}{}),
+		VertexShader:   runTemplate(tmplDirectionalLightVertexShader, settings),
+		FragmentShader: runTemplate(tmplDirectionalLightFragmentShader, settings),
 	}
 }
 
