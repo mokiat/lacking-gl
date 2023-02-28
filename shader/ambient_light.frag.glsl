@@ -47,8 +47,8 @@ vec3 calculateAmbientHDR(ambientSetup s)
 
 	vec3 lightDirection = reflect(s.viewDirection, s.normal);
 	vec3 reflectedLightIntensity = pow(mix(
-			pow(texture(reflectionTextureIn, lightDirection) / pi, vec4(0.25)),
-			pow(texture(refractionTextureIn, lightDirection), vec4(0.25)),
+			pow(texture(refractionTextureIn, lightDirection) / pi, vec4(0.25)),
+			pow(texture(reflectionTextureIn, lightDirection), vec4(0.25)),
 			pow(1.0 - s.roughness, 4.0)
 		), vec4(4.0)).xyz;
 	float geometry = calculateGeometry(geometryInput(
@@ -56,7 +56,7 @@ vec3 calculateAmbientHDR(ambientSetup s)
 	));
 	vec3 reflectedHDR = fresnel * s.reflectedColor * reflectedLightIntensity * geometry;
 
-	vec3 refractedLightIntensity = texture(reflectionTextureIn, -s.normal).xyz;
+	vec3 refractedLightIntensity = texture(refractionTextureIn, -s.normal).xyz;
 	vec3 refractedHDR = (vec3(1.0) - fresnel) * s.refractedColor * refractedLightIntensity / pi;
 
 	return (reflectedHDR + refractedHDR);
