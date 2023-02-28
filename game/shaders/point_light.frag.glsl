@@ -6,6 +6,7 @@ layout(binding = 0) uniform sampler2D fbColor0TextureIn;
 layout(binding = 1) uniform sampler2D fbColor1TextureIn;
 layout(binding = 3) uniform sampler2D fbDepthTextureIn;
 
+// TODO: Move as part of light
 uniform vec3 lightIntensityIn = vec3(1.0, 1.0, 1.0);
 uniform float lightRangeIn = 4.0;
 

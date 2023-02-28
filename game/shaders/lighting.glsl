@@ -50,42 +50,47 @@ float getConeAttenuation(float angle, float outerAngle, float innerAngle)
   return hardAttenuation * (softAttenuation * softAttenuation);
 }
 
-// TODO: Improve the following function
-
-struct fresnelInput {
+struct fresnelInput
+{
 	vec3 reflectanceF0;
 	vec3 halfDirection;
 	vec3 lightDirection;
 };
 
-vec3 calculateFresnel(fresnelInput i) {
+vec3 calculateFresnel(fresnelInput i)
+{
 	float halfLightDot = clamp(abs(dot(i.halfDirection, i.lightDirection)), 0.0, 1.0);
-	return i.reflectanceF0 + (1.0 - i.reflectanceF0) * pow(1.0 - halfLightDot, 5);
+	return i.reflectanceF0 + (1.0 - i.reflectanceF0) * pow(1.0 - halfLightDot, 5.0);
 }
 
-struct distributionInput {
+struct distributionInput
+{
 	float roughness;
 	vec3 normal;
 	vec3 halfDirection;
 };
 
-float calculateDistribution(distributionInput i) {
+float calculateDistribution(distributionInput i)
+{
 	float sqrRough = i.roughness * i.roughness;
 	float halfNormDot = dot(i.normal, i.halfDirection);
 	float denom = halfNormDot * halfNormDot * (sqrRough - 1.0) + 1.0;
 	return sqrRough / (pi * denom * denom);
 }
 
-struct geometryInput {
+struct geometryInput
+{
 	float roughness;
 };
 
-float calculateGeometry(geometryInput i) {
+float calculateGeometry(geometryInput i)
+{
 	// TODO: Use better model
 	return 1.0 / 4.0;
 }
 
-struct directionalSetup {
+struct directionalSetup
+{
 	float roughness;
 	vec3 reflectedColor;
 	vec3 refractedColor;
@@ -95,7 +100,8 @@ struct directionalSetup {
 	vec3 lightIntensity;
 };
 
-vec3 calculateDirectionalHDR(directionalSetup s) {
+vec3 calculateDirectionalHDR(directionalSetup s)
+{
 	vec3 halfDirection = normalize(s.lightDirection + s.viewDirection);
 	vec3 fresnel = calculateFresnel(fresnelInput(
 		s.reflectedColor,
@@ -137,7 +143,7 @@ float shadowAttenuation(sampler2DShadow shadowTex, ShadowSetup s)
 	vec3 shadowNDCPosition = shadowClipPosition.xyz / shadowClipPosition.w;
 	vec3 shadowUVPosition = shadowNDCPosition * 0.5 + vec3(0.5);
 
-	const vec2[] shifts = {
+	const vec2[9] shifts = vec2[](
 		vec2(0.00, 0.00),
 		vec2(1.00, 0.00),
 		vec2(0.71, 0.71),
@@ -146,15 +152,15 @@ float shadowAttenuation(sampler2DShadow shadowTex, ShadowSetup s)
 		vec2(-1.00, 0.00),
 		vec2(-0.71, -0.71),
 		vec2(-0.00, -1.00),
-		vec2(0.71, -0.71),
-	};
+		vec2(0.71, -0.71)
+	);
 
 	float smoothness = 0.0;
 	for (int i = 0; i < 9; i++) {
-		vec3 offset = vec3(1.0 * shifts[i] / 4096, 0.0);
+		vec3 offset = vec3(shifts[i] / vec2(4096), 0.0);
 		smoothness += texture(shadowTex, shadowUVPosition.xyz + offset);
 	}
-	smoothness /= 9;
+	smoothness /= 9.0;
 
 	float amount = texture(shadowTex, shadowUVPosition.xyz);
 	amount *= smoothness;
