@@ -1,23 +1,9 @@
-package ui
+/*template "version.glsl"*/
 
-import (
-	"github.com/mokiat/lacking-gl/internal"
-	"github.com/mokiat/lacking/ui"
-)
-
-func newContourShaders() ui.ShaderSet {
-	vsBuilder := internal.NewShaderSourceBuilder(contourMaterialVertexShaderTemplate)
-	fsBuilder := internal.NewShaderSourceBuilder(contourMaterialFragmentShaderTemplate)
-	return ui.ShaderSet{
-		VertexShader:   vsBuilder.Build,
-		FragmentShader: fsBuilder.Build,
-	}
-}
-
-const contourMaterialVertexShaderTemplate = `
 layout(location = 0) in vec2 positionIn;
 layout(location = 2) in vec4 colorIn;
 
+// TODO: Move to UBO
 uniform mat4 transformMatrixIn;
 uniform mat4 projectionMatrixIn;
 uniform mat4 clipMatrixIn;
@@ -43,15 +29,3 @@ void main()
 
 	gl_Position = projectionMatrixIn * screenPosition;
 }
-`
-
-const contourMaterialFragmentShaderTemplate = `
-layout(location = 0) out vec4 fragmentColor;
-
-noperspective in vec4 colorInOut;
-
-void main()
-{
-	fragmentColor = colorInOut;
-}
-`
