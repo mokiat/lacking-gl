@@ -14,21 +14,21 @@ layout(binding = 5) uniform samplerCube refractionTextureIn;
 
 /*template "lighting.glsl"*/
 
-struct ambientFresnelInput {
+struct ambientFresnelInput
+{
 	vec3 reflectanceF0;
 	vec3 normal;
 	vec3 viewDirection;
 	float roughness;
 };
 
-vec3 calculateAmbientFresnel(ambientFresnelInput i) {
+vec3 calculateAmbientFresnel(ambientFresnelInput i)
+{
 	float normViewDot = clamp(dot(i.normal, i.viewDirection), 0.0, 1.0);
-	return i.reflectanceF0 + (max(vec3(1.0 - i.roughness), i.reflectanceF0) - i.reflectanceF0) * pow(1.0 - normViewDot, 5);
+	return i.reflectanceF0 + (max(vec3(1.0 - i.roughness), i.reflectanceF0) - i.reflectanceF0) * pow(1.0 - normViewDot, 5.0);
 }
 
 struct ambientSetup {
-	samplerCube reflectionTexture;
-	samplerCube refractionTexture;
 	float roughness;
 	vec3 reflectedColor;
 	vec3 refractedColor;
@@ -36,7 +36,8 @@ struct ambientSetup {
 	vec3 normal;
 };
 
-vec3 calculateAmbientHDR(ambientSetup s) {
+vec3 calculateAmbientHDR(ambientSetup s)
+{
 	vec3 fresnel = calculateAmbientFresnel(ambientFresnelInput(
 		s.reflectedColor,
 		s.normal,
@@ -46,16 +47,16 @@ vec3 calculateAmbientHDR(ambientSetup s) {
 
 	vec3 lightDirection = reflect(s.viewDirection, s.normal);
 	vec3 reflectedLightIntensity = pow(mix(
-			pow(texture(s.refractionTexture, lightDirection) / pi, vec4(0.25)),
-			pow(texture(s.reflectionTexture, lightDirection), vec4(0.25)),
-			pow(1.0 - s.roughness, 4)
-		), vec4(4)).xyz;
+			pow(texture(reflectionTextureIn, lightDirection) / pi, vec4(0.25)),
+			pow(texture(refractionTextureIn, lightDirection), vec4(0.25)),
+			pow(1.0 - s.roughness, 4.0)
+		), vec4(4.0)).xyz;
 	float geometry = calculateGeometry(geometryInput(
 		s.roughness
 	));
 	vec3 reflectedHDR = fresnel * s.reflectedColor * reflectedLightIntensity * geometry;
 
-	vec3 refractedLightIntensity = texture(s.refractionTexture, -s.normal).xyz;
+	vec3 refractedLightIntensity = texture(reflectionTextureIn, -s.normal).xyz;
 	vec3 refractedHDR = (vec3(1.0) - fresnel) * s.refractedColor * refractedLightIntensity / pi;
 
 	return (reflectedHDR + refractedHDR);
@@ -80,8 +81,6 @@ void main()
 	vec3 reflectedColor = mix(vec3(0.02), baseColor, metalness);
 
 	vec3 hdr = calculateAmbientHDR(ambientSetup(
-		reflectionTextureIn,
-		refractionTextureIn,
 		roughness,
 		reflectedColor,
 		refractedColor,

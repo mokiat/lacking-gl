@@ -9,6 +9,7 @@ layout(binding = 3) uniform sampler2D fbDepthTextureIn;
 layout(binding = 4) uniform sampler2DShadow fbShadowTextureIn;
 /*end*/
 
+// TODO: Move to light
 uniform vec3 lightIntensityIn = vec3(1.0, 1.0, 1.0);
 
 /*template "ubo_camera.glsl"*/
