@@ -7,15 +7,7 @@ layout(location = 1) out vec4 fbColor1Out;
 layout(binding = 0) uniform sampler2D albedoTwoDTextureIn;
 /*end*/
 
-// TODO: Export to template
-layout (binding = 2, std140) uniform Material
-{
-	vec4 albedoColorIn;
-	float alphaThresholdIn;
-	float normalScaleIn;
-	float metallicIn;
-	float roughnessIn;
-};
+/*template "ubo_material.glsl"*/
 
 smooth in vec3 normalInOut;
 /*if .UseTexturing*/
