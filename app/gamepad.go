@@ -2,6 +2,7 @@ package app
 
 import (
 	"math"
+	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/mokiat/gomath/dprec"
@@ -179,6 +180,10 @@ func (g *Gamepad) ForwardButton() bool {
 func (g *Gamepad) BackButton() bool {
 	g.refresh()
 	return g.backButton
+}
+
+func (g *Gamepad) Pulse(intensity float64, duration time.Duration) {
+	// Haptic feedback is still not supported by glfw.
 }
 
 func (g *Gamepad) markDirty() {
