@@ -25,6 +25,12 @@ func newLoop(locator resource.ReadLocator, title string, window *glfw.Window, co
 		shouldDraw:    true,
 		cursorVisible: true,
 		cursorLocked:  false,
+		gamepads: [4]*Gamepad{
+			newGamepad(glfw.Joystick1),
+			newGamepad(glfw.Joystick2),
+			newGamepad(glfw.Joystick3),
+			newGamepad(glfw.Joystick4),
+		},
 	}
 }
 
@@ -41,6 +47,7 @@ type loop struct {
 	shouldWake    bool
 	cursorVisible bool
 	cursorLocked  bool
+	gamepads      [4]*Gamepad
 }
 
 func (l *loop) Run() error {
@@ -76,6 +83,10 @@ func (l *loop) Run() error {
 		if l.window.ShouldClose() {
 			l.controller.OnCloseRequested(l)
 			l.window.SetShouldClose(false)
+		}
+
+		for _, gamepad := range l.gamepads {
+			gamepad.markDirty()
 		}
 
 		if !l.processTasks(taskProcessingTimeout) {
@@ -118,43 +129,12 @@ func (l *loop) Size() (int, int) {
 	return l.window.GetSize()
 }
 
-func (l *loop) GamepadState(index int) (app.GamepadState, bool) {
-	var joystick glfw.Joystick
-	switch index {
-	case 0:
-		joystick = glfw.Joystick1
-	case 1:
-		joystick = glfw.Joystick2
-	case 2:
-		joystick = glfw.Joystick3
-	case 3:
-		joystick = glfw.Joystick4
-	default:
-		return app.GamepadState{}, false
+func (l *loop) Gamepads() [4]app.Gamepad {
+	var result [4]app.Gamepad
+	for i := range result {
+		result[i] = l.gamepads[i]
 	}
-	if !joystick.Present() || !joystick.IsGamepad() {
-		return app.GamepadState{}, false
-	}
-
-	state := joystick.GetGamepadState()
-	return app.GamepadState{
-		LeftStickX:      float64(state.Axes[glfw.AxisLeftX]),
-		LeftStickY:      -float64(state.Axes[glfw.AxisLeftY]),
-		RightStickX:     float64(state.Axes[glfw.AxisRightX]),
-		RightStickY:     -float64(state.Axes[glfw.AxisRightY]),
-		LeftTrigger:     float64(state.Axes[glfw.AxisLeftTrigger]+1.0) / 2.0,
-		RightTrigger:    float64(state.Axes[glfw.AxisRightTrigger]+1.0) / 2.0,
-		LeftBumper:      state.Buttons[glfw.ButtonLeftBumper] == glfw.Press,
-		RightBumper:     state.Buttons[glfw.ButtonRightBumper] == glfw.Press,
-		SquareButton:    state.Buttons[glfw.ButtonSquare] == glfw.Press,
-		CircleButton:    state.Buttons[glfw.ButtonCircle] == glfw.Press,
-		TriangleButton:  state.Buttons[glfw.ButtonTriangle] == glfw.Press,
-		CrossButton:     state.Buttons[glfw.ButtonCross] == glfw.Press,
-		DpadUpButton:    state.Buttons[glfw.ButtonDpadUp] == glfw.Press,
-		DpadDownButton:  state.Buttons[glfw.ButtonDpadDown] == glfw.Press,
-		DpadLeftButton:  state.Buttons[glfw.ButtonDpadLeft] == glfw.Press,
-		DpadRightButton: state.Buttons[glfw.ButtonDpadRight] == glfw.Press,
-	}, true
+	return result
 }
 
 func (l *loop) Schedule(fn func() error) {

@@ -87,8 +87,6 @@ func Run(cfg *Config, controller app.Controller) error {
 	defer glfw.DetachCurrentContext()
 	glfw.SwapInterval(cfg.swapInterval)
 
-	glfw.UpdateGamepadMappings(gamepadMappings)
-
 	if err := gl.Init(); err != nil {
 		return fmt.Errorf("failed to initialize opengl: %w", err)
 	}
