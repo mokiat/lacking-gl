@@ -643,7 +643,7 @@ func (r *Renderer) executeCommandCopyContentToBuffer(command CommandCopyContentT
 }
 
 func (r *Renderer) executeCommandUpdateBufferData(command CommandUpdateBufferData, data []byte) {
-	gl.NamedBufferSubData(command.BufferID, int(command.Offset), len(data), gl.Ptr(data))
+	gl.NamedBufferSubData(command.BufferID, int(command.Offset), len(data), gl.Ptr(&data[0]))
 }
 
 func (r *Renderer) validateState() {
@@ -663,6 +663,7 @@ func (r *Renderer) validateState() {
 		r.validateBlending(forcedUpdate)
 		r.validateBlendEquation(forcedUpdate)
 		r.validateBlendFunc(forcedUpdate)
+		r.validateBlendColor(forcedUpdate)
 	}
 	r.isDirty = false
 	r.isInvalidated = false
