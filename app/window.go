@@ -29,16 +29,27 @@ func Run(cfg *Config, controller app.Controller) error {
 	}
 	defer glfw.Terminate()
 
-	if cfg.maximized {
-		glfw.WindowHint(glfw.Maximized, glfw.True)
+	var (
+		windowWidth  = cfg.width
+		windowHeight = cfg.height
+		monitor      *glfw.Monitor
+	)
+	if cfg.fullscreen {
+		monitor = glfw.GetPrimaryMonitor()
+		videoMode := monitor.GetVideoMode()
+		windowWidth = videoMode.Width
+		windowHeight = videoMode.Height
 	}
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
 	glfw.WindowHint(glfw.ContextVersionMinor, 6)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 	glfw.WindowHint(glfw.SRGBCapable, glfw.True)
+	if cfg.maximized {
+		glfw.WindowHint(glfw.Maximized, glfw.True)
+	}
 
-	window, err := glfw.CreateWindow(cfg.width, cfg.height, cfg.title, nil, nil)
+	window, err := glfw.CreateWindow(windowWidth, windowHeight, cfg.title, monitor, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create glfw window: %w", err)
 	}
@@ -75,8 +86,6 @@ func Run(cfg *Config, controller app.Controller) error {
 	window.MakeContextCurrent()
 	defer glfw.DetachCurrentContext()
 	glfw.SwapInterval(cfg.swapInterval)
-
-	glfw.UpdateGamepadMappings(gamepadMappings)
 
 	if err := gl.Init(); err != nil {
 		return fmt.Errorf("failed to initialize opengl: %w", err)

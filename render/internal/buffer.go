@@ -42,7 +42,7 @@ type Buffer struct {
 }
 
 func (b *Buffer) Update(info render.BufferUpdateInfo) {
-	gl.NamedBufferSubData(b.id, info.Offset, len(info.Data), gl.Ptr(info.Data))
+	gl.NamedBufferSubData(b.id, info.Offset, len(info.Data), gl.Ptr(&info.Data[0]))
 }
 
 func (b *Buffer) Fetch(info render.BufferFetchInfo) {
