@@ -13,6 +13,11 @@ import (
 	"github.com/mokiat/lacking/log"
 )
 
+var (
+	appLogger = log.Path("/lacking-gl/app")
+	glLogger  = appLogger.Path("/opengl")
+)
+
 // Run starts a new application and opens a single window.
 //
 // The specified configuration is used to determine how the
@@ -91,20 +96,19 @@ func Run(cfg *Config, controller app.Controller) error {
 		return fmt.Errorf("failed to initialize opengl: %w", err)
 	}
 
-	if log.DebugEnabled {
+	if glLogger.DebugEnabled() {
 		gl.Enable(gl.DEBUG_OUTPUT)
 		gl.DebugMessageCallback(func(source uint32, gltype uint32, id uint32, severity uint32, length int32, message string, userParam unsafe.Pointer) {
 			switch severity {
 			case gl.DEBUG_SEVERITY_LOW:
-				log.Debug("[opengl]: %s", message)
+				glLogger.Debug(message)
 			case gl.DEBUG_SEVERITY_MEDIUM:
-				log.Warn("[opengl]: %s", message)
+				glLogger.Warn(message)
 			case gl.DEBUG_SEVERITY_HIGH:
-				log.Error("[opengl]: %s", message)
+				glLogger.Error(message)
 			default:
-				log.Debug("[opengl]: %s", message)
+				glLogger.Debug(message)
 			}
-
 		}, gl.PtrOffset(0))
 	}
 
