@@ -6,7 +6,7 @@ type customCursor struct {
 	cursor *glfw.Cursor
 }
 
-func (c *customCursor) Delete() {
+func (c *customCursor) Destroy() {
 	c.cursor.Destroy()
 	c.cursor = nil
 }
