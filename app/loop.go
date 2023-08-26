@@ -5,7 +5,10 @@ import (
 	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
+	glrender "github.com/mokiat/lacking-gl/render"
 	"github.com/mokiat/lacking/app"
+	"github.com/mokiat/lacking/audio"
+	"github.com/mokiat/lacking/render"
 	"github.com/mokiat/lacking/util/resource"
 )
 
@@ -20,6 +23,7 @@ func newLoop(locator resource.ReadLocator, title string, window *glfw.Window, co
 		title:         title,
 		window:        window,
 		controller:    controller,
+		renderAPI:     glrender.NewAPI(),
 		tasks:         make(chan func(), taskQueueSize),
 		shouldStop:    false,
 		shouldDraw:    true,
@@ -41,6 +45,7 @@ type loop struct {
 	title         string
 	window        *glfw.Window
 	controller    app.Controller
+	renderAPI     render.API
 	tasks         chan func()
 	shouldStop    bool
 	shouldDraw    bool
@@ -191,6 +196,14 @@ func (l *loop) SetCursorVisible(visible bool) {
 func (l *loop) SetCursorLocked(locked bool) {
 	l.cursorLocked = locked
 	l.updateCursorMode()
+}
+
+func (l *loop) RenderAPI() render.API {
+	return l.renderAPI
+}
+
+func (l *loop) AudioAPI() audio.API {
+	return nil // TODO
 }
 
 func (l *loop) Close() {
