@@ -116,7 +116,7 @@ func Run(cfg *Config, controller app.Controller) error {
 
 	if cfg.cursor != nil {
 		cursor := l.CreateCursor(*cfg.cursor)
-		defer cursor.Delete()
+		defer cursor.Destroy()
 		l.UseCursor(cursor)
 		defer l.UseCursor(nil)
 	}

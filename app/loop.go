@@ -5,7 +5,10 @@ import (
 	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
+	glrender "github.com/mokiat/lacking-gl/render"
 	"github.com/mokiat/lacking/app"
+	"github.com/mokiat/lacking/audio"
+	"github.com/mokiat/lacking/render"
 	"github.com/mokiat/lacking/util/resource"
 )
 
@@ -20,7 +23,8 @@ func newLoop(locator resource.ReadLocator, title string, window *glfw.Window, co
 		title:         title,
 		window:        window,
 		controller:    controller,
-		tasks:         make(chan func() error, taskQueueSize),
+		renderAPI:     glrender.NewAPI(),
+		tasks:         make(chan func(), taskQueueSize),
 		shouldStop:    false,
 		shouldDraw:    true,
 		cursorVisible: true,
@@ -41,7 +45,8 @@ type loop struct {
 	title         string
 	window        *glfw.Window
 	controller    app.Controller
-	tasks         chan func() error
+	renderAPI     render.API
+	tasks         chan func()
 	shouldStop    bool
 	shouldDraw    bool
 	shouldWake    bool
@@ -121,12 +126,16 @@ func (l *loop) SetTitle(title string) {
 	l.window.SetTitle(title)
 }
 
+func (l *loop) Size() (int, int) {
+	return l.window.GetSize()
+}
+
 func (l *loop) SetSize(width, height int) {
 	l.window.SetSize(width, height)
 }
 
-func (l *loop) Size() (int, int) {
-	return l.window.GetSize()
+func (l *loop) FramebufferSize() (int, int) {
+	return l.window.GetFramebufferSize()
 }
 
 func (l *loop) Gamepads() [4]app.Gamepad {
@@ -137,7 +146,7 @@ func (l *loop) Gamepads() [4]app.Gamepad {
 	return result
 }
 
-func (l *loop) Schedule(fn func() error) {
+func (l *loop) Schedule(fn func()) {
 	select {
 	case l.tasks <- fn:
 		glfw.PostEmptyEvent()
@@ -189,6 +198,14 @@ func (l *loop) SetCursorLocked(locked bool) {
 	l.updateCursorMode()
 }
 
+func (l *loop) RenderAPI() render.API {
+	return l.renderAPI
+}
+
+func (l *loop) AudioAPI() audio.API {
+	return nil // TODO
+}
+
 func (l *loop) Close() {
 	if !l.shouldStop {
 		l.shouldStop = true
@@ -213,9 +230,7 @@ func (l *loop) processTasks(limit time.Duration) bool {
 		select {
 		case task := <-l.tasks:
 			// There was a task in the queue so run it.
-			if err := task(); err != nil {
-				panic(fmt.Errorf("task error: %w", err))
-			}
+			task()
 		default:
 			// No more tasks, we have consumed everything there
 			// is for now.
